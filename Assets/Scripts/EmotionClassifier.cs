@@ -6,7 +6,7 @@ using System.Linq;
 public struct EmotionDefinition
 {
     public string emotionName;
-    [Tooltip("标准VAD坐标 (-1 到 1)")]
+    [Tooltip("VAD coordinate (-1 ~ 1)")]
     public Vector3 vadCentroid;
 }
 
@@ -17,12 +17,10 @@ public class EmotionClassifier : MonoBehaviour
     [Header("Configuration")]
     public List<EmotionDefinition> emotionDefinitions = new List<EmotionDefinition>();
 
-    [Header("Debug View")]
-    [Tooltip("是否在控制台打印概率详情")]
-    public bool showDebugLogs = false;
-    [SerializeField] private string currentEmotion;
-    [SerializeField] private List<EmotionScore> debugScores;
-    public Dictionary<string, float> probabilityMap = new Dictionary<string, float>();
+    [SerializeField] private List<EmotionScore> emotionRanking;
+
+    [Tooltip("Select UpdateEmotion() from context menu to test")]
+    [SerializeField] Vector3 testingVAD = Vector3.zero;
 
     [System.Serializable]
     public struct EmotionScore
@@ -36,16 +34,17 @@ public class EmotionClassifier : MonoBehaviour
         if (instance == null)
         {
             instance = this;
+            DontDestroyOnLoad(gameObject);
         }
-        else
+        else if (instance != this)
         {
-            Destroy(instance);
+            Debug.LogWarning("Duplicate EmotionClassifier found and destroyed.");
+            Destroy(gameObject);
         }
     }
 
     /// <summary>
-    /// 主函数：输入当前VAD，返回情绪名称
-    /// (合并了之前的 Classify 和 PredictEmotion)
+    /// Pass current VAD, return emotion name
     /// </summary>
     public string Classify(Vector3 currentVad)
     {
@@ -54,70 +53,47 @@ public class EmotionClassifier : MonoBehaviour
         int count = emotionDefinitions.Count;
         float[] logits = new float[count];
 
-        // 1. 计算 Logits (得分)
+        // Calculate points
         for (int i = 0; i < count; i++)
         {
             float distance = Vector3.Distance(currentVad, emotionDefinitions[i].vadCentroid);
 
-            // 推荐数学公式: 1 / (1 + d)
-            // 结果范围 (0, 1]。距离为0时得分为1，距离无穷大时得分为0。
-            // 这种数值范围对 Softmax 非常友好。
+            // closer can get higher point
             logits[i] = 1.0f / (1.0f + distance);
         }
 
         // 2. Softmax
         float[] probabilities = Softmax(logits);
 
-        // =================================================
-        // 核心修改：同时更新 Dictionary 和 Debug列表
-        // =================================================
-        // A. 清理旧数据
-        probabilityMap.Clear();
-        debugScores.Clear();
-
+        emotionRanking.Clear();
 
         for (int i = 0; i < count; i++)
         {
             string eName = emotionDefinitions[i].emotionName;
             float prob = probabilities[i];
 
-            // B. 存入字典 (方便代码调用: probabilityMap["Joy"])
-            probabilityMap.Add(eName, prob);
-
-            // C. 存入列表 (方便 Inspector 查看)
-            debugScores.Add(new EmotionScore { emotion = eName, probability = prob });
+            emotionRanking.Add(new EmotionScore { emotion = eName, probability = prob });
         }
 
-        // 3. 排序 Debug 列表 (可选：让概率最高的排前面，看起来更爽)
-        debugScores.Sort((a, b) => b.probability.CompareTo(a.probability));
-
-        // 4. ArgMax (可以直接取列表的第一个，因为已经排好序了)
-        string maxEmotion = debugScores[0].emotion;
-        currentEmotion = debugScores[0].emotion;
+        // sort ascendingly
+        emotionRanking.Sort((a, b) => b.probability.CompareTo(a.probability));
+        foreach (var emotion in emotionRanking)
+        {
+            Debug.Log($"{emotion.emotion.ToString()}: {emotion.probability.ToString()}");
+        }
+        // find the highest scores
+        string maxEmotion = emotionRanking[0].emotion;
         // Debug.Log($"<color=green>NPC feels {currentEmotion} ({Time.time})</color>");
 
         return maxEmotion;
     }
 
-    // --- 测试入口 ---
-
-    [ContextMenu("Test Update Emotion")] // 添加这个，让你能在 Inspector 右键测试
+    [ContextMenu("Test Update Emotion")]
     public void UpdateEmotion()
     {
-        // 模拟一个测试数据
-        Vector3 testVAD = new Vector3(-0.5f, 0.7f, 0.2f);
-
-        // 强制开启 Log 来看结果
-        bool originalDebug = showDebugLogs;
-        showDebugLogs = true;
-
-        string result = Classify(testVAD);
-        Debug.Log($"<color=green>最终判定结果: {result}</color>");
-
-        showDebugLogs = originalDebug; // 还原设置
+        string result = Classify(testingVAD);
+        Debug.Log($"<color=green>Testing Result: {result}</color>");
     }
-
-    // ================== 数学核心实现 (保持不变) ==================
 
     private float[] Softmax(float[] logits)
     {
@@ -138,37 +114,134 @@ public class EmotionClassifier : MonoBehaviour
         return probs;
     }
 
-    private int ArgMax(float[] array)
-    {
-        float maxVal = float.MinValue;
-        int maxIndex = 0;
-        for (int i = 0; i < array.Length; i++)
-        {
-            if (array[i] > maxVal)
-            {
-                maxVal = array[i];
-                maxIndex = i;
-            }
-        }
-        return maxIndex;
-    }
+    // ================== Initialization ==================
 
-    // ================== 初始化工具 ==================
-
-    [ContextMenu("Reset to Standard VAD")]
+    [ContextMenu("Initialize Emotion")]
     public void ResetToStandardEmotions()
     {
         emotionDefinitions = new List<EmotionDefinition>()
         {
-            new EmotionDefinition { emotionName = "Neutral (中性)", vadCentroid = Vector3.zero },
-            new EmotionDefinition { emotionName = "Joy (快乐)",     vadCentroid = new Vector3(0.75f, 0.60f, 0.40f) },
-            new EmotionDefinition { emotionName = "Anger (愤怒)",   vadCentroid = new Vector3(-0.51f, 0.59f, 0.25f) },
-            new EmotionDefinition { emotionName = "Fear (恐惧)",    vadCentroid = new Vector3(-0.64f, 0.60f, -0.43f) },
-            new EmotionDefinition { emotionName = "Sadness (悲伤)", vadCentroid = new Vector3(-0.60f, -0.30f, -0.20f) },
-            new EmotionDefinition { emotionName = "Boredom (无聊)", vadCentroid = new Vector3(-0.65f, -0.62f, -0.33f) },
-            new EmotionDefinition { emotionName = "Disdain (鄙视)", vadCentroid = new Vector3(-0.60f, 0.50f, 0.70f) },
-            new EmotionDefinition { emotionName = "Docile (温顺)",  vadCentroid = new Vector3(0.40f, -0.20f, -0.40f) }
+            // ==================== 0. Neutral ====================
+            new EmotionDefinition { emotionName = "Neutral", vadCentroid = Vector3.zero },
+
+            // ==================== 1. Joy | Positive, becoming excited, with high control ====================
+            new EmotionDefinition { emotionName = "Serenity",  vadCentroid = new Vector3(0.30f, -0.20f, 0.10f) }, // low intensity
+            new EmotionDefinition { emotionName = "Joy",       vadCentroid = new Vector3(0.75f, 0.60f, 0.40f) },  // medium intensity
+            new EmotionDefinition { emotionName = "Ecstasy",   vadCentroid = new Vector3(0.95f, 0.90f, 0.60f) },  // high intensity
+
+            // ==================== 2. Trust | Positive, calm, with feel secure ====================
+            new EmotionDefinition { emotionName = "Acceptance",vadCentroid = new Vector3(0.40f, -0.40f, 0.20f) }, // low intensity
+            new EmotionDefinition { emotionName = "Trust",     vadCentroid = new Vector3(0.70f, -0.30f, 0.40f) }, // medium intensity
+            new EmotionDefinition { emotionName = "Admiration",vadCentroid = new Vector3(0.80f, 0.20f, -0.30f) }, // high intensity
+
+            // ==================== 3. Fear | Negative, agitated, extremely low control ====================
+            new EmotionDefinition { emotionName = "Apprehension",vadCentroid=new Vector3(-0.30f, 0.30f, -0.20f) },// low intensity
+            new EmotionDefinition { emotionName = "Fear",      vadCentroid = new Vector3(-0.64f, 0.60f, -0.43f) },// medium intensity
+            new EmotionDefinition { emotionName = "Terror",    vadCentroid = new Vector3(-0.95f, 0.95f, -0.80f) },// high intensity
+
+            // ==================== 4. Surprise | Neutral, extremely excited, out of control ====================
+            new EmotionDefinition { emotionName = "Distraction",vadCentroid= new Vector3(0.00f, 0.40f, -0.10f) }, // low intensity
+            new EmotionDefinition { emotionName = "Surprise",  vadCentroid = new Vector3(0.10f, 0.80f, -0.30f) }, // medium intensity
+            new EmotionDefinition { emotionName = "Amazement", vadCentroid = new Vector3(0.20f, 0.95f, -0.50f) }, // high intensity
+
+            // ==================== 5.Sadness | Negative, depressed, lost of control ====================
+            new EmotionDefinition { emotionName = "Pensiveness",vadCentroid= new Vector3(-0.20f, -0.20f, -0.10f) },// low intensity
+            new EmotionDefinition { emotionName = "Sadness",   vadCentroid = new Vector3(-0.60f, -0.30f, -0.20f) },// medium intensity
+            new EmotionDefinition { emotionName = "Grief",     vadCentroid = new Vector3(-0.95f, -0.10f, -0.80f) },// high intensity
+
+            // ==================== 6. Disgust | Negative, becoming excited, high control ====================
+            new EmotionDefinition { emotionName = "Boredom",   vadCentroid = new Vector3(-0.65f, -0.62f, -0.33f) },// low intensity
+            new EmotionDefinition { emotionName = "Disgust",   vadCentroid = new Vector3(-0.80f, 0.20f, 0.30f) },  // medium intensity
+            new EmotionDefinition { emotionName = "Loathing",  vadCentroid = new Vector3(-0.95f, 0.60f, 0.60f) },  // high intensity
+
+            // ==================== 7. Anger | Negative, extremely excited, highly controlling ====================
+            new EmotionDefinition { emotionName = "Annoyance", vadCentroid = new Vector3(-0.25f, 0.30f, 0.10f) }, // low intensity
+            new EmotionDefinition { emotionName = "Anger",     vadCentroid = new Vector3(-0.51f, 0.59f, 0.25f) }, // medium intensity
+            new EmotionDefinition { emotionName = "Rage",      vadCentroid = new Vector3(-0.90f, 0.95f, 0.40f) }, // high intensity
+
+            // ==================== 8. Anticipation | Positive, excited, in control of the situation ====================
+            new EmotionDefinition { emotionName = "Interest",  vadCentroid = new Vector3(0.30f, 0.40f, 0.20f) },  // low intensity
+            new EmotionDefinition { emotionName = "Anticipation",vadCentroid=new Vector3(0.50f, 0.70f, 0.40f) },  // medium intensity
+            new EmotionDefinition { emotionName = "Vigilance", vadCentroid = new Vector3(0.60f, 0.90f, 0.60f) }   // high intensity
         };
-        Debug.Log("已重置为标准 VAD 情绪值");
     }
+
+    // ================== OnGUI 实时 Debug 面板 ==================
+
+    //[Header("GUI Debug Settings")]
+    //[Tooltip("是否在屏幕左上角显示情绪排行榜")]
+    //public bool showOnGUI = true;
+    //[Tooltip("显示前几名的情绪")]
+    //public int displayTopN = 5;
+
+    //// 用于绘制纯色进度条的内部贴图
+    //private Texture2D barTexture;
+    //private GUIStyle labelStyle;
+
+    //private void OnGUI()
+    //{
+    //    // 如果开关没开，或者没有数据，直接跳过
+    //    if (!showOnGUI || emotionRanking == null || emotionRanking.Count == 0) return;
+
+    //    // 1. 初始化画笔和贴图 (只执行一次)
+    //    if (barTexture == null)
+    //    {
+    //        barTexture = new Texture2D(1, 1);
+    //        barTexture.SetPixel(0, 0, Color.white);
+    //        barTexture.Apply();
+
+    //        labelStyle = new GUIStyle();
+    //        labelStyle.normal.textColor = Color.white;
+    //        labelStyle.fontSize = 14;
+    //        labelStyle.fontStyle = FontStyle.Bold;
+    //    }
+
+    //    // 2. 定义整个 Debug 面板的区域 (左上角, 宽 300, 动态高度)
+    //    int panelWidth = 250;
+    //    int rowHeight = 25;
+    //    int maxItems = Mathf.Min(displayTopN, emotionRanking.Count);
+    //    int panelHeight = 40 + (maxItems * rowHeight);
+
+    //    Rect panelRect = new Rect(10, 10, panelWidth, panelHeight);
+
+    //    // 绘制半透明黑底背景
+    //    GUI.color = new Color(0, 0, 0, 0.7f);
+    //    GUI.DrawTexture(panelRect, barTexture);
+    //    GUI.color = Color.white;
+
+    //    // 绘制标题
+    //    GUI.Label(new Rect(20, 15, 200, 20), "Realtime Emotion Ranking", labelStyle);
+
+    //    // 3. 遍历并绘制 Top N 的情绪数据
+    //    for (int i = 0; i < maxItems; i++)
+    //    {
+    //        EmotionScore score = emotionRanking[i];
+
+    //        float yPos = 40 + (i * rowHeight);
+
+    //        // A. 绘制情绪名称文本
+    //        GUI.Label(new Rect(20, yPos, 100, 20), score.emotion, labelStyle);
+
+    //        // B. 绘制百分比文本
+    //        string percentText = (score.probability * 100f).ToString("F1") + "%";
+    //        GUI.Label(new Rect(200, yPos, 50, 20), percentText, labelStyle);
+
+    //        // C. 绘制动态进度条 (最核心的可视化部分)
+    //        // 进度条最大宽度为 90 像素
+    //        float maxBarWidth = 90f;
+    //        float currentBarWidth = maxBarWidth * score.probability;
+    //        Rect barRect = new Rect(100, yPos + 5, currentBarWidth, 10);
+
+    //        // 根据排名给进度条上色 (第一名绿色，第二名黄色，其他灰色)
+    //        if (i == 0) GUI.color = Color.green;
+    //        else if (i == 1) GUI.color = Color.yellow;
+    //        else GUI.color = Color.gray;
+
+    //        // 画出进度条
+    //        GUI.DrawTexture(barRect, barTexture);
+
+    //        // 恢复默认颜色，防止影响下一次绘制
+    //        GUI.color = Color.white;
+    //    }
+    //}
 }
