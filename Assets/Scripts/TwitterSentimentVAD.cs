@@ -2,13 +2,14 @@
 using Unity.InferenceEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class TwitterSentimentVAD : MonoBehaviour
 {
     [Header("Twitter RoBERTa Files")]
     public ModelAsset modelAsset;
-    public TextAsset vocabFile;   // 拖入 vocab.txt
-    public TextAsset mergesFile;  // 拖入 merges.txt
+    public TextAsset vocabFile;  
+    public TextAsset mergesFile; 
 
     [Header("Test Input")]
     [TextArea] public string inputSentence = "This game is straight fire! 🔥";
@@ -23,9 +24,12 @@ public class TwitterSentimentVAD : MonoBehaviour
         if(instance == null)
         {
             instance = this;
-        } else
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (instance != this)
         {
-            Destroy(instance);
+            Debug.LogWarning("Duplicate TwitterSentimentVAD found and destroyed.");
+            Destroy(gameObject);
         }
     }
 
@@ -37,7 +41,7 @@ public class TwitterSentimentVAD : MonoBehaviour
             var model = ModelLoader.Load(modelAsset);
             worker = new Worker(model, BackendType.GPUCompute);
 
-            Analyze(inputSentence);
+            //Analyze(inputSentence);
         }
     }
 
@@ -48,68 +52,62 @@ public class TwitterSentimentVAD : MonoBehaviour
     {
         if (worker == null) return Vector3.zero;
 
-        // 1. 分词 (BPE)
+        // 1. BPE
         List<int> tokens = tokenizer.Encode(text);
         int[] inputIds = tokens.ToArray();
         TensorShape shape = new TensorShape(1, inputIds.Length);
 
-        // 2. 准备 Tensor
+        // 2. Prepare Tensor
         using Tensor<int> tInput = new Tensor<int>(shape, inputIds);
         using Tensor<int> tMask = new Tensor<int>(shape, Enumerable.Repeat(1, inputIds.Length).ToArray());
 
         worker.SetInput("input_ids", tInput);
         worker.SetInput("attention_mask", tMask);
 
-        // 3. 推理
+        // 3. Reasoning
         worker.Schedule();
 
-        // 4. 获取 Logits (维度: 1x3 -> [Neg, Neu, Pos])
+        // 4. Obtain Logits (vector: 1x3 -> [Neg, Neu, Pos])
         Tensor<float> output = worker.PeekOutput() as Tensor<float>;
         float[] logits = output.DownloadToArray();
 
-        // 5. Softmax 归一化
+        // 5. Softmax
         float[] probs = Softmax(logits);
-        float pNeg = probs[0]; // 负面概率
-        float pNeu = probs[1]; // 中性概率
-        float pPos = probs[2]; // 正面概率
+        float pNeg = probs[0]; // Negative probability
+        float pNeu = probs[1]; // Neutral probability
+        float pPos = probs[2]; // Positive probability
 
-        //Debug.Log($"<color=yellow>Twitter Output:</color> Neg:{pNeg:P1}  Neu:{pNeu:P1}  Pos:{pPos:P1}");
+        Debug.Log($"<color=yellow>Sentence Sentiment Probability:</color>\nInput: {text}\nNeg:{pNeg:P1}, Neu:{pNeu:P1}, Pos:{pPos:P1}");
 
-        // --- 核心修改：直接映射到 -1 ~ 1 ---
+        // Mapping 0 ~ 1 value to -1 ~ 1 value
 
-        // [Valence 愉悦度] (-1: 痛苦/负面, 1: 快乐/正面)
-        // 逻辑：正面概率减去负面概率，结果自然落在 -1 到 1 之间
-        // 例：100% 正面 = 1 - 0 = 1
-        // 例：100% 负面 = 0 - 1 = -1
-        // 例：100% 中性 = 0 - 0 = 0
+        // [Valence] (-1: sadness, 1: joy)
+        // 100% Positive = 1 - 0 = 1
+        // 100% Negative = 0 - 1 = -1
+        // 100% Neutral = 0 - 0 = 0
         float valence = pPos - pNeg;
 
-        // [Arousal 激活度] (-1: 昏昏欲睡/平静, 1: 激动/警觉)
-        // 逻辑：中性 (pNeu) 代表平静 (-1)。非中性 (pPos + pNeg) 代表激动。
-        // 公式：(总情绪强度 * 2) - 1
-        // 例：100% 中性 -> (0 * 2) - 1 = -1 (非常平静)
-        // 例：100% 正/负 -> (1 * 2) - 1 = 1 (非常激动)
+        // [Arousal] (-1: inactive, 1: active)
+        // 100% Neutral -> (0 * 2) - 1 = -1 (Calm)
+        // 100% Positive/Negative -> (1 * 2) - 1 = 1 (Excited)
         float emotionIntensity = pPos + pNeg;
         float arousal = (emotionIntensity * 2f) - 1f;
 
-        // [Dominance 优势度] (-1: 顺从/弱势, 1: 掌控/强势)
-        // 逻辑：
-        // - 正面情绪 (Joy) 通常是自信的 -> 趋向 1
-        // - 负面情绪 (推特上的 Anger/Hate) 通常是攻击性的 -> 趋向 0.5 ~ 0.8
-        // - 中性情绪 (Neutral) 是被动/无感的 -> 趋向 -1
-        // 公式：(正面 + 0.6倍负面) - 中性
+        // [Dominance] (-1: submission, 1: control)
+        // Positive -> 1
+        // Negative -> 0.5 ~ 0.8
+        // Neutral -> -1
         float dominance = (pPos + (pNeg * 0.6f)) - pNeu;
 
-        // 最后做一次 Clamp 防止浮点数误差导致越界 (比如变成 1.00001)
         valence = Mathf.Clamp(valence, -1f, 1f);
         arousal = Mathf.Clamp(arousal, -1f, 1f);
         dominance = Mathf.Clamp(dominance, -1f, 1f);
 
-        Vector3 vad = new Vector3(valence, arousal, dominance);
+        Vector3 vad = new Vector3((float)Math.Round(valence, 2), (float)Math.Round(arousal, 2), (float)Math.Round(dominance, 2));
 
         string tag = EmotionClassifier.instance.Classify(vad);
 
-        Debug.Log($"<color=yellow>TwitterSentimentVAD(): '{text}', {vad} {(tag)}</color>");
+        Debug.Log($"<color=yellow>TwitterSentimentVAD Analyze Output: </color>\nInput: {text}\nValence: {vad.x:F2}, Arousal: {vad.y:F2}, Dominance: {vad.z:F2}\nClassify: {(tag)}");
 
         return vad;
     }

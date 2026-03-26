@@ -9,11 +9,11 @@ public class RobertaTokenizer
     private Dictionary<string, int> encoder;
     private Dictionary<string, int> bpeRanks;
     private Dictionary<string, string> cache = new Dictionary<string, string>();
-    private const string SpaceSymbol = "Ġ"; // RoBERTa 的特殊空格符
+    private const string SpaceSymbol = "Ġ"; // RoBERTa special character
 
     public RobertaTokenizer(TextAsset vocabFile, TextAsset mergesFile)
     {
-        // 1. 解析 vocab.json (简单的正则提取，避免依赖 JSON 库)
+        // analyze vocab.json
         encoder = new Dictionary<string, int>();
         var matches = Regex.Matches(vocabFile.text, "\"([^\"]+)\":\\s*(\\d+)");
         foreach (Match match in matches)
@@ -22,13 +22,13 @@ public class RobertaTokenizer
             if (!encoder.ContainsKey(key)) encoder.Add(key, int.Parse(match.Groups[2].Value));
         }
 
-        // 2. 解析 merges.txt (BPE 核心映射表)
+        // analyze merges.txt
         bpeRanks = new Dictionary<string, int>();
         string[] lines = mergesFile.text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
         int startLine = lines[0].StartsWith("#") ? 1 : 0;
         for (int i = startLine; i < lines.Length; i++)
         {
-            // 每一行是 "char1 char2" 的格式
+            // "char1 char2" format
             if (!bpeRanks.ContainsKey(lines[i])) bpeRanks.Add(lines[i], i);
         }
     }
@@ -38,16 +38,14 @@ public class RobertaTokenizer
         List<int> tokens = new List<int>();
         tokens.Add(0); // <s> Start Token
 
-        // 预处理：RoBERTa 对空格敏感
-        // Twitter 模型通常会将 @user 和 http 替换，这里做最简处理
+        // Preprocessing
         string cleanText = text.Trim();
 
-        // 简单按空格分词 (真正的 BPE 应该按 byte 处理，但这对英文足够了)
+        // split words by space
         string[] words = cleanText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
         for (int i = 0; i < words.Length; i++)
         {
-            // 给每个词加前缀空格 (RoBERTa 逻辑)
             string word = (i == 0 ? "" : SpaceSymbol) + words[i];
 
             foreach (string token in BPE(word))

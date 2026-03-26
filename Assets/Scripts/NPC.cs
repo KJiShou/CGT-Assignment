@@ -112,7 +112,7 @@ public class NPC : MonoBehaviour
     {
         // 1. 获取输入 VAD (映射到 -1 ~ 1)
         Vector3 rawInput = TwitterSentimentVAD.instance.Analyze(input);
-        Vector3 processedInput = DialogContextAnalyzer.instance.ProcessInput(rawInput);
+        Vector3 processedInput = DialogContextAnalyzer.instance.ProcessInput(rawInput, 10);
 
 
         // 2. 获取性格系数 (Personality Factors)

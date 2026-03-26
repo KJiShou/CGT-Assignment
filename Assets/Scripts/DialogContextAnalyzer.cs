@@ -1,18 +1,14 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class DialogContextAnalyzer : MonoBehaviour
 {
     public static DialogContextAnalyzer instance;
 
     [Header("Settings")]
-    [Tooltip("新句子的权重 (0~1)。0.3 表示历史占 70%，新句子占 30%")]
+    [Tooltip("Weight of new VAD value (0~1). 0.3 means history VAD proportion 70%，new VAD proportion 30%")]
     [Range(0.1f, 1f)] public float smoothingFactor = 0.4f;
-
-    [Tooltip("保留多少句历史记录来分析趋势")]
-    public int historyCapacity = 100;
 
     [Header("Runtime State")]
     // 上下文平滑后的 VAD (Contextual VAD)
@@ -38,11 +34,11 @@ public class DialogContextAnalyzer : MonoBehaviour
     /// <summary>
     /// 输入当前句子的 VAD，返回结合了历史上下文的 VAD
     /// </summary>
-    public Vector3 ProcessInput(Vector3 currentRawVAD)
+    public Vector3 ProcessInput(Vector3 currentRawVAD, int maxMemoryCount)
     {
         // 1. 更新原始历史队列
         rawHistory.Enqueue(currentRawVAD);
-        if (rawHistory.Count > historyCapacity) rawHistory.Dequeue();
+        if (rawHistory.Count > maxMemoryCount) rawHistory.Dequeue();
 
         // 2. 计算 EMA (指数移动平均) - 这是你的"语境 VAD"
         if (smoothVAD == Vector3.zero)
