@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Net.NetworkInformation;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Camera))]
 public class SelectCharacter : MonoBehaviour
@@ -23,6 +25,9 @@ public class SelectCharacter : MonoBehaviour
     [SerializeField] TextMeshProUGUI currentEmotionText;
     [SerializeField] TextMeshProUGUI longTermMoodVAD;
     [SerializeField] TextMeshProUGUI longTermMoodText;
+    [SerializeField] Button emotionButton;
+    [SerializeField] Button probabilityButton;
+    [SerializeField] Button personalityButton;
 
     [Header("Marker Settings")]
     [SerializeField] GameObject marker;
@@ -36,6 +41,8 @@ public class SelectCharacter : MonoBehaviour
     private GameObject currentSelectedNPC;
     private NPCDoubleDecay npcState;
     public bool clickingUI { get; private set; } = false;
+
+    [SerializeField] Color buttonOnSelectedColor = new Color(126, 216, 242, 255);
 
     private void Awake()
     {
@@ -58,6 +65,7 @@ public class SelectCharacter : MonoBehaviour
             if (EventSystem.current.IsPointerOverGameObject())
             {
                 clickingUI = true;
+                
                 return;
             }
             clickingUI = false;
@@ -82,6 +90,7 @@ public class SelectCharacter : MonoBehaviour
                     {
                         chatUIManager.targetNPC = npcState;
                         personalityRadarController.npcSource = npcState;
+                        npcState.isTalkWithPlayer = true;
 
                         if (npcState.historyInputs.Count > 0)
                         {
@@ -147,6 +156,8 @@ public class SelectCharacter : MonoBehaviour
                 input.SetActive(false);
             }
         }
+
+        npcState.isTalkWithPlayer = false;
 
         chatUIManager.targetNPC = null;
         personalityRadarController.npcSource = null;

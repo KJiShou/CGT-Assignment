@@ -103,7 +103,7 @@ public class NPCDoubleDecay : MonoBehaviour
         if (isTalkWithPlayer)
         {
             Vector3 targetEmotion = longTermMood * historyInfluence;
-
+            
             if (currentEmotion != targetEmotion)
             {
                 currentEmotion = Vector3.MoveTowards(currentEmotion, targetEmotion, timeDecaySpeed * Time.deltaTime);

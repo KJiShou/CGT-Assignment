@@ -20,11 +20,15 @@ public class ChatUIManager : MonoBehaviour
         {
             if (_targetNPC == value) return;
 
+            if (_targetNPC != null)
+            {
+                _targetNPC.isTalkWithPlayer = false;
+            }
+
             // If current UI is open and has old target, cancel the old target event
             if (this.isActiveAndEnabled && _targetNPC != null)
             {
                 _targetNPC.OnEmotionProcessed -= OnNPCReacted;
-                _targetNPC.isTalkWithPlayer = false;
             }
 
             // When switch target，set last NPC message to false
@@ -37,7 +41,6 @@ public class ChatUIManager : MonoBehaviour
             if (this.isActiveAndEnabled && _targetNPC != null)
             {
                 _targetNPC.OnEmotionProcessed += OnNPCReacted;
-                _targetNPC.isTalkWithPlayer = true;
             }
         }
     }
