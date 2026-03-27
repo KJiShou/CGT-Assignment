@@ -71,14 +71,14 @@ public class ChatUIManager : MonoBehaviour
         _targetNPC.ReceivePlayerMessage(message);
     }
 
-    private void OnNPCReacted(string originalMessage, Vector3 newEmotion, string currentTrend)
+    private void OnNPCReacted(string originalMessage, Vector3 trendVAD, string currentTrend, Vector3 inputVAD)
     {
         GameObject messageObject = Instantiate(playerMessagePrefab, playerMessageParentTransform);
 
         TextMeshProUGUI txt = messageObject.GetComponentInChildren<TextMeshProUGUI>();
         if (txt != null)
         {
-            txt.text = $"{originalMessage} -- {DateTime.Now:HH:mm:ss}";
+            txt.text = $"{originalMessage}\n<size=20>Input VAD: V:{inputVAD.x}, A:{inputVAD.y}, D:{inputVAD.z}</size>\n<size=20><color=red>Trend -> V:{trendVAD.x}, A:{trendVAD.y}, D:{trendVAD.z} ({currentTrend})</size></color>";
         }
 
         if(_targetNPC.historyInputs.Count > _targetNPC.maxPlayerInputHistory)
@@ -88,7 +88,7 @@ public class ChatUIManager : MonoBehaviour
 
         _targetNPC.historyInputs.Add(messageObject);
 
-        Debug.Log($"<color=cyan>UI Manager Instantiated Chat Message. NPC emotion: {newEmotion}</color>");
+        Debug.Log($"<color=cyan>UI Manager Instantiated Chat Message.</color>");
     }
 
     private void ClearChatUI()
