@@ -25,9 +25,6 @@ public class SelectCharacter : MonoBehaviour
     [SerializeField] TextMeshProUGUI currentEmotionText;
     [SerializeField] TextMeshProUGUI longTermMoodVAD;
     [SerializeField] TextMeshProUGUI longTermMoodText;
-    [SerializeField] Button emotionButton;
-    [SerializeField] Button probabilityButton;
-    [SerializeField] Button personalityButton;
 
     [Header("Marker Settings")]
     [SerializeField] GameObject marker;
@@ -36,13 +33,17 @@ public class SelectCharacter : MonoBehaviour
     [Header("Dependencies")]
     public ChatUIManager chatUIManager;
     public PersonalityRadarController personalityRadarController;
+    public SliderController sliderController;
+
+    [Header("UI Panels")]
+    [SerializeField] GameObject emotionPanel;
+    [SerializeField] GameObject probabilityPanel;
+    [SerializeField] GameObject personalityPanel;
 
     // Internal Status
     private GameObject currentSelectedNPC;
     private NPCDoubleDecay npcState;
     public bool clickingUI { get; private set; } = false;
-
-    [SerializeField] Color buttonOnSelectedColor = new Color(126, 216, 242, 255);
 
     private void Awake()
     {
@@ -81,8 +82,6 @@ public class SelectCharacter : MonoBehaviour
                     // prevent repeatedly refresh UI
                     if (currentSelectedNPC == hitObj) return;
 
-                    // ClosePrevNPCMessage();
-
                     currentSelectedNPC = hitObj;
 
                     // Use TryGetComponent for safety
@@ -91,6 +90,7 @@ public class SelectCharacter : MonoBehaviour
                         chatUIManager.targetNPC = npcState;
                         personalityRadarController.npcSource = npcState;
                         npcState.isTalkWithPlayer = true;
+                        sliderController.npcState = npcState;
 
                         if (npcState.historyInputs.Count > 0)
                         {
@@ -99,7 +99,8 @@ public class SelectCharacter : MonoBehaviour
                                 input.SetActive(true);
                             }
                         }
-
+                        UpdateNPCSettingsSliderValue();
+                        UpdatePlayerSettingsSliderValue();
                         SetMarker();
                         toggleablePanel.SetActive(true);
                     }
@@ -129,17 +130,22 @@ public class SelectCharacter : MonoBehaviour
 
         npcName.text = $"Selected NPC: {currentSelectedNPC.name}";
 
-        opennessValue.text = $"Openness\n({npcState.personality.openness:F2})";
-        consientiousnessValue.text = $"Consientiousness\n({npcState.personality.conscientiousness:F2})";
-        extraversionValue.text = $"Extraversion\n({npcState.personality.extraversion:F2})";
-        agreeablenessValue.text = $"Agreeableness\n({npcState.personality.agreeableness:F2})";
-        neuroticismValue.text = $"Neuroticism\n({npcState.personality.neuroticism:F2})";
-
-        currentEmotionVAD.text = $"Valence: {npcState.currentEmotion.x:F2},\nArousal: {npcState.currentEmotion.y:F2}\nDominance: {npcState.currentEmotion.z:F2}";
-        longTermMoodVAD.text = $"Valence: {npcState.longTermMood.x:F2},\nArousal: {npcState.longTermMood.y:F2}\nDominance: {npcState.longTermMood.z:F2}";
-
-        currentEmotionText.text = $"Tag: {npcState.currentEmotionTag}";
-        longTermMoodText.text = $"Tag: {npcState.longTermMoodTag}";
+        if (emotionPanel.activeSelf)
+        {
+            currentEmotionVAD.text = $"Valence: {npcState.currentEmotion.x:F2},\nArousal: {npcState.currentEmotion.y:F2}\nDominance: {npcState.currentEmotion.z:F2}";
+            longTermMoodVAD.text = $"Valence: {npcState.longTermMood.x:F2},\nArousal: {npcState.longTermMood.y:F2}\nDominance: {npcState.longTermMood.z:F2}";
+            
+            currentEmotionText.text = $"Tag: {npcState.currentEmotionTag}";
+            longTermMoodText.text = $"Tag: {npcState.longTermMoodTag}";
+        }
+        else if (personalityPanel.activeSelf)
+        {
+            opennessValue.text = $"Openness\n({npcState.personality.openness:F2})";
+            consientiousnessValue.text = $"Conscientiousness\n({npcState.personality.conscientiousness:F2})";
+            extraversionValue.text = $"Extraversion\n({npcState.personality.extraversion:F2})";
+            agreeablenessValue.text = $"Agreeableness\n({npcState.personality.agreeableness:F2})";
+            neuroticismValue.text = $"Neuroticism\n({npcState.personality.neuroticism:F2})";
+        }
     }
 
     /// <summary>
@@ -163,23 +169,11 @@ public class SelectCharacter : MonoBehaviour
         personalityRadarController.npcSource = null;
         currentSelectedNPC = null;
         npcState = null;
+        sliderController.npcState = null;
 
         UnsetMarker();
         toggleablePanel.SetActive(false);
     }
-
-    //private void ClosePrevNPCMessage()
-    //{
-    //    if (npcState == null) { return; }
-
-    //    if (npcState.historyInputs.Count > 0)
-    //    {
-    //        foreach (var input in npcState.historyInputs)
-    //        {
-    //            input.SetActive(false);
-    //        }
-    //    }
-    //}
 
     private void SetMarker()
     {
@@ -198,5 +192,29 @@ public class SelectCharacter : MonoBehaviour
             marker.SetActive(false);
             marker.transform.SetParent(null);
         }
+    }
+
+    private void UpdateNPCSettingsSliderValue()
+    {
+        if (npcState == null || sliderController == null) return;
+
+        sliderController.memoryForgetRateSlider.value = npcState.memoryForgetRate;
+        sliderController.historyInfluenceSlider.value = npcState.historyInfluence;
+        sliderController.maxEmotionHistorySlider.value = npcState.maxEmotionHistory;
+        sliderController.timeDecaySpeedSlider.value = npcState.timeDecaySpeed;
+        sliderController.opennessSlider.value = npcState.personality.openness;
+        sliderController.conscientiousnessSlider.value = npcState.personality.conscientiousness;
+        sliderController.extraversionSlider.value = npcState.personality.extraversion;
+        sliderController.agreeablenessSlider.value = npcState.personality.agreeableness;
+        sliderController.neuroticismSlider.value = npcState.personality.neuroticism;
+    }
+
+    private void UpdatePlayerSettingsSliderValue()
+    {
+        if (npcState == null || sliderController == null) return;
+
+        sliderController.smoothingFactorSlider.value = npcState.smoothingFactor;
+        sliderController.emotionTrendThresholdSlider.value = npcState.playerEmotionTrendThreshold;
+        sliderController.maxInputHistorySlider.value = npcState.maxPlayerInputHistory;
     }
 }

@@ -9,7 +9,7 @@ public class NPCDoubleDecay : MonoBehaviour
     /// <summary>
     /// Action<Player input, Latest emotion VAD, current emotion trend>
     /// </summary>
-    public event Action<string, Vector3, string> OnEmotionProcessed;
+    public event Action<string, Vector3, string, Vector3> OnEmotionProcessed;
 
     [System.Serializable]
     public class EmotionMemory
@@ -72,12 +72,6 @@ public class NPCDoubleDecay : MonoBehaviour
 
     [Header("Decay Settings")]
     [Range(0f, 5f)] public float timeDecaySpeed = 0.1f;
-
-    //[Header("Player Messaging")]
-    //[SerializeField] TMP_InputField playerInputField;
-    //[SerializeField] List<string> playerHistoryInput;
-    //[SerializeField] GameObject playerMessagePrefab;
-    //[SerializeField] Transform playerMessageParentTransform;
     
     [Header("Player Input Settings")]
     [Tooltip("Weight of new VAD value (0~1). 0.3 means history VAD proportion 70%，new VAD proportion 30%")]
@@ -151,55 +145,8 @@ public class NPCDoubleDecay : MonoBehaviour
         currentEmotionTag = EmotionClassifier.instance.Classify(currentEmotion);
         longTermMoodTag = EmotionClassifier.instance.Classify(longTermMood);
 
-        OnEmotionProcessed?.Invoke(message, currentEmotion, currentTrend);
+        OnEmotionProcessed?.Invoke(message, smoothVAD, currentTrend, rawInput);
     }
-
-    // [ContextMenu("Analyze Player Dialog")]
-    //public void AnalyzePlayerDialog()
-    //{
-    //    string message = playerInputField.text.Trim();
-    //    if(message == "") return;
-    //    playerInputField.text = "";
-
-    //    GameObject messageObject = Instantiate(playerMessagePrefab, playerMessageParentTransform);
-    //    messageObject.GetComponentInChildren<TextMeshProUGUI>().text = $"{message} -- {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}";
-
-    //    playerHistoryInput.Add(message);
-
-    //    // Get VAD value from player input
-    //    Vector3 rawInput = TwitterSentimentVAD.instance.Analyze(message);
-
-    //    // Use player history input's VAD to analyze current sentence emotion trend
-    //    Vector3 processedInput = ProcessInput(rawInput);
-    //    //Vector3 processedInput = rawInput;
-
-    //    // Get NPC personality to VAD value
-    //    Vector3 pFactors = personality.GetVAD();
-
-    //    // Calculate current player input can make how much impact to NPC
-    //    float vDelta = pFactors.x * processedInput.x;
-    //    float aDelta = pFactors.y * processedInput.y;
-    //    float dDelta = pFactors.z * processedInput.z;
-    //    Vector3 currentDelta = new Vector3(vDelta, aDelta, dDelta);
-
-    //    // Record into NPC history emotion
-    //    AddToHistory(currentDelta);
-
-    //    // Calculate NPC Long-Term mood
-    //    RecalculateLongTermMood();
-
-    //    // Add emotion impact to NPC current emotion
-    //    currentEmotion += currentDelta;
-
-    //    currentEmotion.x = Mathf.Clamp(currentEmotion.x, -1f, 1f);
-    //    currentEmotion.y = Mathf.Clamp(currentEmotion.y, -1f, 1f);
-    //    currentEmotion.z = Mathf.Clamp(currentEmotion.z, -1f, 1f);
-
-    //    string currentTag = EmotionClassifier.instance.Classify(currentEmotion);
-    //    string longTermTag = EmotionClassifier.instance.Classify(longTermMood);
-
-    //    Debug.Log($"<color=white>NPC Emotion Updated | Current: {currentEmotion} ({currentTag}) | LongTerm Mood: {longTermMood} ({longTermTag})</color>");
-    //}
 
     /// <summary>
     /// Pass current input VAD, return contextual VAD
@@ -220,7 +167,24 @@ public class NPCDoubleDecay : MonoBehaviour
         }
 
         playerInputHistoryVAD.Enqueue(currentRawVAD);
-        if (playerInputHistoryVAD.Count > maxPlayerInputHistory) playerInputHistoryVAD.Dequeue();
+        int excessCount = playerInputHistoryVAD.Count - maxPlayerInputHistory;
+
+        if (excessCount > 0)
+        {
+            for (int i = 0; i < excessCount; i++)
+            {
+                playerInputHistoryVAD.Dequeue();
+
+                if (historyInputs[i] != null)
+                {
+                    Destroy(historyInputs[i]);
+                }
+            }
+            
+            historyInputs.RemoveRange(0, excessCount);
+        }
+
+        // if (playerInputHistoryVAD.Count > maxPlayerInputHistory) playerInputHistoryVAD.Dequeue();
 
         Debug.Log($"<color=orange>History Player's Dialog Smooth Transition : {smoothVAD} | Trend: {currentTrend}</color>");
 
@@ -274,10 +238,11 @@ public class NPCDoubleDecay : MonoBehaviour
         // emotionHistory.Add(new EmotionMemory(delta, Time.time, messagePrefab));
         emotionHistory.Add(new EmotionMemory(delta, Time.time));
 
-        if (emotionHistory.Count > maxEmotionHistory)
+        int excessCount = emotionHistory.Count - maxEmotionHistory;
+
+        if (excessCount > 0)
         {
-            //emotionHistory[0].ClearPrefab();
-            emotionHistory.RemoveAt(0);
+            emotionHistory.RemoveRange(0, excessCount);
         }
     }
 
