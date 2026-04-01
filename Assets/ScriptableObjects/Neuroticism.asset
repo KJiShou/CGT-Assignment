@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9203a3b4efa96c40a519d4befc4a8cd, type: 3}
+  m_Name: Neuroticism
+  m_EditorClassIdentifier: Assembly-CSharp::TraitDictionarySO
+  traitName: Neuroticism
+  levels:
+  - minThreshold: 0.6
+    shortLabel: Volatile
+    detailedDescription: Emotionally highly unstable; the slightest disturbance can
+      trigger severe anxiety or a breakdown.
+  - minThreshold: 0.2
+    shortLabel: Anxious
+    detailedDescription: Prone to experiencing negative emotions, easily becoming
+      tense or depressed under pressure.
+  - minThreshold: -0.2
+    shortLabel: Balanced
+    detailedDescription: Possesses a normal range of emotional fluctuation and is
+      capable of handling daily stress.
+  - minThreshold: -0.6
+    shortLabel: Composed
+    detailedDescription: Highly resilient, maintaining a calm and clear head even
+      in moments of crisis.
+  - minThreshold: -1
+    shortLabel: Stoic
+    detailedDescription: Like an emotionless machine, feeling almost no fear, anxiety,
+      or sadness.

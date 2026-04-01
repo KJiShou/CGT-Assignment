@@ -6,15 +6,23 @@ using UnityEngine.InputSystem;
 public class CameraController : MonoBehaviour
 {
     Vector2 moveInput = Vector2.zero;
-    [SerializeField] float moveSpeed = 2.5f;
-    [SerializeField] float rotationSpeed = 1f;
+    public float moveSpeed = 2.5f;
+    public float rotationSpeed = 1f;
     float rotationAngle;
-    [SerializeField] CinemachineCamera cmCamera;
-    float targetFOV;
+    public CinemachineCamera cmCamera;
     float zoomInput;
-    [SerializeField] float minFOV = 35f;
-    [SerializeField] float maxFOV = 90f;
-    [SerializeField] float zoomSensitivity = 5f;
+
+    [Header("Perspective Settings")]
+    public float minFOV = 35f;
+    public float maxFOV = 90f;
+    public float fovZoomSensitivity = 5f;
+    float targetFOV;
+
+    [Header("Orthographic Settings")]
+    public float minOrthoSize = 2f;
+    public float maxOrthoSize = 15f;
+    public float orthoZoomSensitivity = 0.5f;
+    private float targetOrthoSize;
 
     public void OnInputCameraMove(InputAction.CallbackContext context)
     {
@@ -34,11 +42,12 @@ public class CameraController : MonoBehaviour
     private void Start()
     {
         targetFOV = cmCamera.Lens.FieldOfView;
+        targetOrthoSize = cmCamera.Lens.OrthographicSize;
     }
 
     private void Update()
     {
-        if (SelectCharacter.instance.clickingUI) return;
+        if (SelectCharacter.instance.clickingUI || SettingsController.instance.isOpen) return;
         CameraMove();
         RotateCamera();
         Zoom();
@@ -46,9 +55,22 @@ public class CameraController : MonoBehaviour
 
     private void Zoom()
     {
-        targetFOV += -(zoomInput) * zoomSensitivity;
-        targetFOV = Mathf.Clamp(targetFOV, minFOV, maxFOV);
-        cmCamera.Lens.FieldOfView = targetFOV;
+        if (zoomInput == 0f) return;
+
+        if (cmCamera.Lens.Orthographic)
+        {
+            // Modify OrthographicSize
+            targetOrthoSize += -(zoomInput) * orthoZoomSensitivity;
+            targetOrthoSize = Mathf.Clamp(targetOrthoSize, minOrthoSize, maxOrthoSize);
+            cmCamera.Lens.OrthographicSize = targetOrthoSize;
+        }
+        else
+        {
+            // Modify FieldOfView
+            targetFOV += -(zoomInput) * fovZoomSensitivity;
+            targetFOV = Mathf.Clamp(targetFOV, minFOV, maxFOV);
+            cmCamera.Lens.FieldOfView = targetFOV;
+        }
     }
 
     private void RotateCamera()

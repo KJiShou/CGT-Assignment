@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9203a3b4efa96c40a519d4befc4a8cd, type: 3}
+  m_Name: Extraversion
+  m_EditorClassIdentifier: Assembly-CSharp::TraitDictionarySO
+  traitName: Extraversion
+  levels:
+  - minThreshold: 0.6
+    shortLabel: Exuberant
+    detailedDescription: Craves social interaction, draws energy from crowds, and
+      has a strong desire to perform or be the center of attention.
+  - minThreshold: 0.2
+    shortLabel: Sociable
+    detailedDescription: Approachable and friendly, feeling comfortable and at ease
+      in social situations.
+  - minThreshold: -0.2
+    shortLabel: Ambivert
+    detailedDescription: Neither fears nor overly pursues social interaction; engagement
+      depends entirely on the company.
+  - minThreshold: -0.6
+    shortLabel: Introverted
+    detailedDescription: Prefers solitude; rapidly loses energy in loud or crowded
+      social settings.
+  - minThreshold: -1
+    shortLabel: Reclusive
+    detailedDescription: Extremely resistant to interacting with others, as if confined
+      within their own secluded world.

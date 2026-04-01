@@ -37,7 +37,7 @@
                     "name": "Interact",
                     "type": "Button",
                     "id": "852140f2-7766-474d-8707-702459ba45f3",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "Hold",
                     "initialStateCheck": false
@@ -83,6 +83,15 @@
                     "type": "Button",
                     "id": "641cd816-40e6-41b4-8c3d-04687c349290",
                     "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "OpenSettingsPanel",
+                    "type": "Button",
+                    "id": "c70e26a5-7ec6-4b9d-871c-7926a18ef244",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -473,6 +482,17 @@
                     "action": "Crouch",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "187bef47-52fb-4846-9c56-12e94a9f9b26",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "OpenSettingsPanel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -493,7 +513,7 @@
                     "name": "Submit",
                     "type": "Button",
                     "id": "7607c7b6-cd76-4816-beef-bd0341cfe950",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false

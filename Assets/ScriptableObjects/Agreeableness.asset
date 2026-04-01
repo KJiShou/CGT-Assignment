@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9203a3b4efa96c40a519d4befc4a8cd, type: 3}
+  m_Name: Agreeableness
+  m_EditorClassIdentifier: Assembly-CSharp::TraitDictionarySO
+  traitName: Agreeableness
+  levels:
+  - minThreshold: 0.6
+    shortLabel: Compassionate
+    detailedDescription: Supremely kind and empathetic, even willing to sacrifice
+      personal interests for the sake of others.
+  - minThreshold: 0.2
+    shortLabel: Amiable
+    detailedDescription: Mild-tempered and helpful, trying their best to avoid conflict
+      with others.
+  - minThreshold: -0.2
+    shortLabel: Detached
+    detailedDescription: Objective and rational in dealing with others; does not
+      easily offer goodwill, nor actively provokes trouble.
+  - minThreshold: -0.6
+    shortLabel: Cynical
+    detailedDescription: Lacks empathy, speaks aggressively, and constantly suspects
+      the motives of others.
+  - minThreshold: -1
+    shortLabel: Malicious
+    detailedDescription: Extremely selfish and destructive, always ready to exploit
+      or harm others.

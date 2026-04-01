@@ -16,7 +16,7 @@ public class SelectCharacter : MonoBehaviour
     [SerializeField] TextMeshProUGUI npcName;
     [SerializeField] GameObject personalityChartPanel;
     [SerializeField] TextMeshProUGUI opennessValue;
-    [SerializeField] TextMeshProUGUI consientiousnessValue;
+    [SerializeField] TextMeshProUGUI conscientiousnessValue;
     [SerializeField] TextMeshProUGUI extraversionValue;
     [SerializeField] TextMeshProUGUI agreeablenessValue;
     [SerializeField] TextMeshProUGUI neuroticismValue;
@@ -39,6 +39,20 @@ public class SelectCharacter : MonoBehaviour
     [SerializeField] GameObject emotionPanel;
     [SerializeField] GameObject probabilityPanel;
     [SerializeField] GameObject personalityPanel;
+
+    [Header("Tooltip Trigger")]
+    [SerializeField] TooltipTrigger opennessTooltipTrigger;    
+    [SerializeField] TooltipTrigger conscientiousnessTooltipTrigger;    
+    [SerializeField] TooltipTrigger extraversionTooltipTrigger;    
+    [SerializeField] TooltipTrigger agreeablenessTooltipTrigger;    
+    [SerializeField] TooltipTrigger neuroticismTooltipTrigger;
+
+    [Header("Face Camera")]
+    [SerializeField] GameObject faceCameraImage;
+
+    [Header("Raycast Settings")]
+    [Tooltip("Layer that allow to click")]
+    public LayerMask clickableLayers;
 
     // Internal Status
     private GameObject currentSelectedNPC;
@@ -72,7 +86,8 @@ public class SelectCharacter : MonoBehaviour
             clickingUI = false;
 
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            // Raycast distance 1000m, only collide with clickableLayers
+            if (Physics.Raycast(ray, out RaycastHit hit, 1000f, clickableLayers))
             {
                 GameObject hitObj = hit.transform.gameObject;
 
@@ -81,6 +96,8 @@ public class SelectCharacter : MonoBehaviour
                 {
                     // prevent repeatedly refresh UI
                     if (currentSelectedNPC == hitObj) return;
+
+                    DeselectNPC();
 
                     currentSelectedNPC = hitObj;
 
@@ -99,8 +116,10 @@ public class SelectCharacter : MonoBehaviour
                                 input.SetActive(true);
                             }
                         }
+                        UpdatePersonalityTooltipText();
                         UpdateNPCSettingsSliderValue();
                         UpdatePlayerSettingsSliderValue();
+                        OpenNPCFaceCamera();
                         SetMarker();
                         toggleablePanel.SetActive(true);
                     }
@@ -138,14 +157,12 @@ public class SelectCharacter : MonoBehaviour
             currentEmotionText.text = $"Tag: {npcState.currentEmotionTag}";
             longTermMoodText.text = $"Tag: {npcState.longTermMoodTag}";
         }
-        else if (personalityPanel.activeSelf)
-        {
-            opennessValue.text = $"Openness\n({npcState.personality.openness:F2})";
-            consientiousnessValue.text = $"Conscientiousness\n({npcState.personality.conscientiousness:F2})";
-            extraversionValue.text = $"Extraversion\n({npcState.personality.extraversion:F2})";
-            agreeablenessValue.text = $"Agreeableness\n({npcState.personality.agreeableness:F2})";
-            neuroticismValue.text = $"Neuroticism\n({npcState.personality.neuroticism:F2})";
-        }
+
+        opennessValue.text = $"Openness\n({npcState.personality.openness:F2})";
+        conscientiousnessValue.text = $"Conscientiousness\n({npcState.personality.conscientiousness:F2})";
+        extraversionValue.text = $"Extraversion\n({npcState.personality.extraversion:F2})";
+        agreeablenessValue.text = $"Agreeableness\n({npcState.personality.agreeableness:F2})";
+        neuroticismValue.text = $"Neuroticism\n({npcState.personality.neuroticism:F2})";
     }
 
     /// <summary>
@@ -155,6 +172,8 @@ public class SelectCharacter : MonoBehaviour
     {
         if (currentSelectedNPC == null) return;
 
+        npcName.text = $"Selected NPC: ";
+
         if (npcState.historyInputs.Count > 0)
         {
             foreach (var input in npcState.historyInputs)
@@ -163,7 +182,19 @@ public class SelectCharacter : MonoBehaviour
             }
         }
 
+        opennessTooltipTrigger.targetNPC = null;
+        conscientiousnessTooltipTrigger.targetNPC = null;
+        extraversionTooltipTrigger.targetNPC = null;
+        agreeablenessTooltipTrigger.targetNPC = null;
+        neuroticismTooltipTrigger.targetNPC = null;
+
         npcState.isTalkWithPlayer = false;
+
+        if (npcState != null && npcState.faceCamera != null)
+        {
+            faceCameraImage.SetActive(false);
+            npcState.faceCamera.gameObject.SetActive(false);
+        }
 
         chatUIManager.targetNPC = null;
         personalityRadarController.npcSource = null;
@@ -216,5 +247,26 @@ public class SelectCharacter : MonoBehaviour
         sliderController.smoothingFactorSlider.value = npcState.smoothingFactor;
         sliderController.emotionTrendThresholdSlider.value = npcState.playerEmotionTrendThreshold;
         sliderController.maxInputHistorySlider.value = npcState.maxPlayerInputHistory;
+    }
+
+    private void UpdatePersonalityTooltipText()
+    {
+        if(npcState == null) return;
+
+        opennessTooltipTrigger.targetNPC = npcState;
+        conscientiousnessTooltipTrigger.targetNPC = npcState;
+        extraversionTooltipTrigger.targetNPC = npcState;
+        agreeablenessTooltipTrigger.targetNPC = npcState;
+        neuroticismTooltipTrigger.targetNPC = npcState;
+    }
+
+    private void OpenNPCFaceCamera()
+    {
+        if (npcState == null) return;
+        if (npcState.faceCamera != null)
+        {
+            faceCameraImage.SetActive(true);
+            npcState.faceCamera.gameObject.SetActive(true);
+        }
     }
 }
