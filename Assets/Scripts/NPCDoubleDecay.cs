@@ -89,6 +89,9 @@ public class NPCDoubleDecay : MonoBehaviour
 
     public List<GameObject> historyInputs = new List<GameObject>();
 
+    [Header("Camera Setup")]
+    public Camera faceCamera;
+
     // Emotion decaying
     void Update()
     {
