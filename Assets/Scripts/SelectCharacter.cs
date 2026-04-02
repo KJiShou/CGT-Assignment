@@ -119,7 +119,7 @@ public class SelectCharacter : MonoBehaviour
                         UpdatePersonalityTooltipText();
                         UpdateNPCSettingsSliderValue();
                         UpdatePlayerSettingsSliderValue();
-                        OpenNPCFaceCamera();
+                        OpenNPCSetup();
                         SetMarker();
                         toggleablePanel.SetActive(true);
                     }
@@ -196,6 +196,11 @@ public class SelectCharacter : MonoBehaviour
             npcState.faceCamera.gameObject.SetActive(false);
         }
 
+        if (npcState.topLight != null)
+        {
+            npcState.topLight.SetActive(false);
+        }
+
         chatUIManager.targetNPC = null;
         personalityRadarController.npcSource = null;
         currentSelectedNPC = null;
@@ -260,13 +265,18 @@ public class SelectCharacter : MonoBehaviour
         neuroticismTooltipTrigger.targetNPC = npcState;
     }
 
-    private void OpenNPCFaceCamera()
+    private void OpenNPCSetup()
     {
         if (npcState == null) return;
         if (npcState.faceCamera != null)
         {
             faceCameraImage.SetActive(true);
             npcState.faceCamera.gameObject.SetActive(true);
+        }
+
+        if(npcState.topLight != null)
+        {
+            npcState.topLight.SetActive(true);
         }
     }
 }
