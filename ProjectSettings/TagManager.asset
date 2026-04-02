@@ -9,11 +9,11 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - NPC
   - Water
   - UI
   - Wall
-  - 
+  - Floor
   - 
   - 
   - 
@@ -44,9 +44,9 @@ TagManager:
     locked: 0
   m_RenderingLayers:
   - Default
-  - Light Layer 1
-  - Light Layer 2
-  - Light Layer 3
+  - Floor Light
+  - NPC Light
+  - Wall Light
   - Light Layer 4
   - Light Layer 5
   - Light Layer 6

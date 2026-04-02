@@ -92,6 +92,9 @@ public class NPCDoubleDecay : MonoBehaviour
     [Header("Camera Setup")]
     public Camera faceCamera;
 
+    [Header("Light Setup")]
+    public GameObject topLight;
+
     // Emotion decaying
     void Update()
     {
