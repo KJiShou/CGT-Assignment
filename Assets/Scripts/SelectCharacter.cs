@@ -108,6 +108,9 @@ public class SelectCharacter : MonoBehaviour
                         personalityRadarController.npcSource = npcState;
                         npcState.isTalkWithPlayer = true;
                         sliderController.npcState = npcState;
+                        npcState.controller.isSelecting = true;
+
+                        npcState.ShowNPCEmotion();
 
                         if (npcState.historyInputs.Count > 0)
                         {
@@ -181,6 +184,9 @@ public class SelectCharacter : MonoBehaviour
                 input.SetActive(false);
             }
         }
+        
+        npcState.controller.isSelecting = false;
+        npcState.controller.resetAnim = true;
 
         opennessTooltipTrigger.targetNPC = null;
         conscientiousnessTooltipTrigger.targetNPC = null;

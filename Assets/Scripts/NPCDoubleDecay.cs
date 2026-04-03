@@ -95,6 +95,14 @@ public class NPCDoubleDecay : MonoBehaviour
     [Header("Light Setup")]
     public GameObject topLight;
 
+    [HideInInspector]
+    public AIController controller;
+
+    private void Start()
+    {
+        controller = GetComponent<AIController>();
+    }
+
     // Emotion decaying
     void Update()
     {
@@ -151,7 +159,21 @@ public class NPCDoubleDecay : MonoBehaviour
         currentEmotionTag = EmotionClassifier.instance.Classify(currentEmotion);
         longTermMoodTag = EmotionClassifier.instance.Classify(longTermMood);
 
+        ShowNPCEmotion();
+
         OnEmotionProcessed?.Invoke(message, smoothVAD, currentTrend, rawInput);
+    }
+
+    public void ShowNPCEmotion()
+    {
+        EmotionClassifier.instance.emotionDefinitions.ForEach(e =>
+        {
+            if (e.emotionName.Equals(currentEmotionTag))
+            {
+                //controller.animTrigger = currentEmotionTag;
+                controller.animTrigger = "Serenity";
+            }
+        });
     }
 
     /// <summary>

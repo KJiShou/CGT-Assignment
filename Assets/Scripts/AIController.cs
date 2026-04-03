@@ -5,16 +5,23 @@ public class AIController : MonoBehaviour
 {
     public NavMeshAgent agent;
     public float range = 10f;
-
     public Transform centerPoint; // NPC moving range
 
     public Animator anim;
-
     public float intervalTime = 3.0f;
     private float timer = 0f;
 
     private Vector3 destination = Vector3.zero;
     public float stopRadius = 0.5f;
+
+    public bool isSelecting = false;
+    public bool resetAnim = false;
+    public string animTrigger = "Idle";
+
+    private int hashWalking;
+    private int hashIdle;
+    private int walkableMask;
+    private float sqrStopRadius;
 
     private void Start()
     {
@@ -26,19 +33,69 @@ public class AIController : MonoBehaviour
         {
             centerPoint = this.transform;
         }
+
+        hashWalking = Animator.StringToHash("Walking");
+        hashIdle = Animator.StringToHash("Idle");
+        walkableMask = 1 << NavMesh.GetAreaFromName("Walkable");
+
+        sqrStopRadius = stopRadius * stopRadius;
     }
 
     private void Update()
     {
+        if (isSelecting)
+        {
+            HandleSelectionState();
+        }
+        else
+        {
+            HandleRoamingState();
+        }
+    }
+
+    private void HandleSelectionState()
+    {
+        agent.isStopped = true;
+        timer = 0f;
+
+        anim.SetBool(hashWalking, false);
+
+        if (animTrigger == "Neutral" || animTrigger == "Idle")
+        {
+            anim.SetBool(hashIdle, true);
+        }
+        else
+        {
+            anim.SetBool(hashIdle, false);
+            anim.SetBool(Animator.StringToHash(animTrigger), true);
+        }
+    }
+
+    private void HandleRoamingState()
+    {
+        agent.isStopped = false;
+
+        // Clear previous animation state
+        if (animTrigger != "Neutral")
+        {
+            anim.SetBool(Animator.StringToHash(animTrigger), false);
+        }
+
+        if (resetAnim)
+        {
+            resetAnim = false;
+            agent.ResetPath(); // Clear path
+            timer = 0f;        
+        }
+
         if (IsAgentDone())
         {
-            // NPC reach destination, start count down
-            anim.SetBool("isWalking", false);
+            anim.SetBool(hashIdle, true);
+            anim.SetBool(hashWalking, false);
 
             timer += Time.deltaTime;
             if (timer >= intervalTime)
             {
-                // find next random position as destination
                 if (RandomPoint(centerPoint.position, range, out Vector3 point))
                 {
                     Debug.DrawRay(point, Vector3.up * 2f, Color.blue, 2.0f);
@@ -50,8 +107,8 @@ public class AIController : MonoBehaviour
         }
         else
         {
-            // NPC is walking
-            anim.SetBool("isWalking", true);
+            anim.SetBool(hashIdle, false);
+            anim.SetBool(hashWalking, true);
             timer = 0f;
         }
     }
@@ -61,15 +118,14 @@ public class AIController : MonoBehaviour
     /// </summary>
     private bool IsAgentDone()
     {
-        // 1. 如果路径还在计算中，肯定没到
         // if path still counting, then haven't reach destination
         if (agent.pathPending) return false;
 
         // ==========================================
         // If NPC enter destination stop range, count as reached destination
         // ==========================================
-        float absoluteDistance = Vector3.Distance(transform.position, destination);
-        if (absoluteDistance <= stopRadius)
+        float sqrDistance = (transform.position - destination).sqrMagnitude;
+        if (sqrDistance <= sqrStopRadius)
         {
             return true;
         }
@@ -98,7 +154,6 @@ public class AIController : MonoBehaviour
 
         NavMeshHit hit;
 
-        int walkableMask = 1 << NavMesh.GetAreaFromName("Walkable");
         if (NavMesh.SamplePosition(randomPoint, out hit, range, walkableMask))
         {
             result = hit.position;
