@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using static UnityEditor.VersionControl.Message;
 
 public class NPCDoubleDecay : MonoBehaviour
 {
@@ -69,6 +70,7 @@ public class NPCDoubleDecay : MonoBehaviour
     [Tooltip("Current emotion value")]
     public Vector3 currentEmotion = Vector3.zero;
     public string currentEmotionTag = "Neutral";
+    public string prevEmotionTag = "Neutral";
 
     [Header("Decay Settings")]
     [Range(0f, 5f)] public float timeDecaySpeed = 0.1f;
@@ -156,6 +158,7 @@ public class NPCDoubleDecay : MonoBehaviour
         currentEmotion.y = Mathf.Clamp(currentEmotion.y, -1f, 1f);
         currentEmotion.z = Mathf.Clamp(currentEmotion.z, -1f, 1f);
 
+        prevEmotionTag = currentEmotionTag;
         currentEmotionTag = EmotionClassifier.instance.Classify(currentEmotion);
         longTermMoodTag = EmotionClassifier.instance.Classify(longTermMood);
 
@@ -164,14 +167,20 @@ public class NPCDoubleDecay : MonoBehaviour
         OnEmotionProcessed?.Invoke(message, smoothVAD, currentTrend, rawInput);
     }
 
+    [ContextMenu("ShowNPCEmotion")]
     public void ShowNPCEmotion()
     {
+        if(prevEmotionTag != "Neutral")
+        {
+            controller.anim.SetBool(Animator.StringToHash(prevEmotionTag), false);
+        }
+        
         EmotionClassifier.instance.emotionDefinitions.ForEach(e =>
         {
             if (e.emotionName.Equals(currentEmotionTag))
             {
-                //controller.animTrigger = currentEmotionTag;
-                controller.animTrigger = "Serenity";
+                controller.animTrigger = currentEmotionTag;
+                //controller.animTrigger = "Serenity";
             }
         });
     }
