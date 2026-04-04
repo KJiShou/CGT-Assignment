@@ -25202,6 +25202,7 @@ MonoBehaviour:
   longTermMoodTag: Neutral
   currentEmotion: {x: 0, y: 0, z: 0}
   currentEmotionTag: Neutral
+  prevEmotionTag: Neutral
   timeDecaySpeed: 0.1
   smoothingFactor: 0.3
   smoothVAD: {x: 0, y: 0, z: 0}
@@ -34844,6 +34845,26 @@ PrefabInstance:
     - target: {fileID: 2109658590587594954, guid: 58604e0f58c2f6a4a8fa01c01f6691b9, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2276685215441413665, guid: 58604e0f58c2f6a4a8fa01c01f6691b9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.08347847
+      objectReference: {fileID: 0}
+    - target: {fileID: 7144726032188898997, guid: 58604e0f58c2f6a4a8fa01c01f6691b9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.09061448
+      objectReference: {fileID: 0}
+    - target: {fileID: 7280724036764655385, guid: 58604e0f58c2f6a4a8fa01c01f6691b9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.0237387
+      objectReference: {fileID: 0}
+    - target: {fileID: 7550758054764554380, guid: 58604e0f58c2f6a4a8fa01c01f6691b9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.0834787
+      objectReference: {fileID: 0}
+    - target: {fileID: 8560204086599279408, guid: 58604e0f58c2f6a4a8fa01c01f6691b9, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
