@@ -10,6 +10,9 @@ public class ChatUIManager : MonoBehaviour
     public GameObject playerMessagePrefab;
     public Transform playerMessageParentTransform;
 
+    public TextMeshProUGUI inputCount;
+    public TextMeshProUGUI npcEmotionCount;
+
     [Header("Target AI")]
     [Tooltip("Receive message NPC")]
     private NPCDoubleDecay _targetNPC;
@@ -41,6 +44,8 @@ public class ChatUIManager : MonoBehaviour
             if (this.isActiveAndEnabled && _targetNPC != null)
             {
                 _targetNPC.OnEmotionProcessed += OnNPCReacted;
+                UpdateClearPlayerInputHistoryCount();
+                UpdateClearNPCEmotionHistoryCount();
             }
         }
     }
@@ -50,6 +55,8 @@ public class ChatUIManager : MonoBehaviour
         if (_targetNPC != null)
         {
             _targetNPC.OnEmotionProcessed += OnNPCReacted;
+            UpdateClearPlayerInputHistoryCount();
+            UpdateClearNPCEmotionHistoryCount();
         }
     }
 
@@ -78,15 +85,18 @@ public class ChatUIManager : MonoBehaviour
         TextMeshProUGUI txt = messageObject.GetComponentInChildren<TextMeshProUGUI>();
         if (txt != null)
         {
-            txt.text = $"{originalMessage}\n<size=20>Input VAD: V:{inputVAD.x}, A:{inputVAD.y}, D:{inputVAD.z}</size>\n<size=20><color=red>Trend -> V:{trendVAD.x}, A:{trendVAD.y}, D:{trendVAD.z} ({currentTrend})</size></color>";
+            txt.text = $"{originalMessage}\n<size=20>Input VAD: V:{inputVAD.x:F2}, A:{inputVAD.y:F2}, D:{inputVAD.z:F2}</size>\n<size=20><color=red>Trend -> V:{trendVAD.x:F2}, A:{trendVAD.y:F2}, D:{trendVAD.z:F2} ({currentTrend})</size></color>";
         }
 
-        if(_targetNPC.historyInputs.Count > _targetNPC.maxPlayerInputHistory)
+        if (_targetNPC.historyInputs.Count > _targetNPC.maxPlayerInputHistory)
         {
             _targetNPC.historyInputs.RemoveAt(0);
         }
 
         _targetNPC.historyInputs.Add(messageObject);
+
+        UpdateClearPlayerInputHistoryCount();
+        UpdateClearNPCEmotionHistoryCount();
 
         Debug.Log($"<color=cyan>UI Manager Instantiated Chat Message.</color>");
     }
@@ -98,6 +108,36 @@ public class ChatUIManager : MonoBehaviour
         foreach (GameObject child in _targetNPC.historyInputs)
         {
             child.SetActive(false);
+        }
+    }
+
+    public void ClearNPCEmotionHistory()
+    {
+        if (_targetNPC == null) return;
+        _targetNPC.ClearEmotionHistory();
+        UpdateClearNPCEmotionHistoryCount();
+    }
+
+    public void ClearPlayerInputHistory()
+    {
+        if (_targetNPC == null) return;
+        _targetNPC.ClearPlayerInputHistory();
+        UpdateClearPlayerInputHistoryCount();
+    }
+
+    private void UpdateClearPlayerInputHistoryCount()
+    {
+        if (_targetNPC != null && inputCount != null)
+        {
+            inputCount.text = $"Clear Input History\n(Total messages: {_targetNPC.historyInputs.Count})";
+        }
+    }
+
+    private void UpdateClearNPCEmotionHistoryCount()
+    {
+        if (_targetNPC != null && npcEmotionCount != null)
+        {
+            npcEmotionCount.text = $"Clear Emotion History\n(Count: {_targetNPC.emotionHistory.Count})";
         }
     }
 }

@@ -17,7 +17,7 @@ public class EmotionClassifier : MonoBehaviour
     [Header("Configuration")]
     public List<EmotionDefinition> emotionDefinitions = new List<EmotionDefinition>();
 
-    [SerializeField] private List<EmotionScore> emotionRanking;
+    //[SerializeField] private List<EmotionScore> emotionRanking;
 
     [Tooltip("Select UpdateEmotion() from context menu to test")]
     [SerializeField] Vector3 testingVAD = Vector3.zero;
@@ -28,6 +28,7 @@ public class EmotionClassifier : MonoBehaviour
         public string emotion;
         [Range(0, 1)] public float probability;
     }
+    public List<EmotionScore> emotionRanking;
 
     private void Awake()
     {
@@ -77,10 +78,10 @@ public class EmotionClassifier : MonoBehaviour
 
         // sort ascendingly
         emotionRanking.Sort((a, b) => b.probability.CompareTo(a.probability));
-        foreach (var emotion in emotionRanking)
-        {
-            Debug.Log($"{emotion.emotion.ToString()}: {emotion.probability.ToString()}");
-        }
+        //foreach (var emotion in emotionRanking)
+        //{
+        //    Debug.Log($"{emotion.emotion.ToString()}: {emotion.probability.ToString()}");
+        //}
         // find the highest scores
         string maxEmotion = emotionRanking[0].emotion;
         // Debug.Log($"<color=green>NPC feels {currentEmotion} ({Time.time})</color>");
@@ -89,7 +90,7 @@ public class EmotionClassifier : MonoBehaviour
     }
 
     [ContextMenu("Test Update Emotion")]
-    public void UpdateEmotion()
+    public void TestEmotionClassify()
     {
         string result = Classify(testingVAD);
         Debug.Log($"<color=green>Testing Result: {result}</color>");
@@ -165,83 +166,4 @@ public class EmotionClassifier : MonoBehaviour
             new EmotionDefinition { emotionName = "Vigilance", vadCentroid = new Vector3(0.60f, 0.90f, 0.60f) }   // high intensity
         };
     }
-
-    // ================== OnGUI 实时 Debug 面板 ==================
-
-    //[Header("GUI Debug Settings")]
-    //[Tooltip("是否在屏幕左上角显示情绪排行榜")]
-    //public bool showOnGUI = true;
-    //[Tooltip("显示前几名的情绪")]
-    //public int displayTopN = 5;
-
-    //// 用于绘制纯色进度条的内部贴图
-    //private Texture2D barTexture;
-    //private GUIStyle labelStyle;
-
-    //private void OnGUI()
-    //{
-    //    // 如果开关没开，或者没有数据，直接跳过
-    //    if (!showOnGUI || emotionRanking == null || emotionRanking.Count == 0) return;
-
-    //    // 1. 初始化画笔和贴图 (只执行一次)
-    //    if (barTexture == null)
-    //    {
-    //        barTexture = new Texture2D(1, 1);
-    //        barTexture.SetPixel(0, 0, Color.white);
-    //        barTexture.Apply();
-
-    //        labelStyle = new GUIStyle();
-    //        labelStyle.normal.textColor = Color.white;
-    //        labelStyle.fontSize = 14;
-    //        labelStyle.fontStyle = FontStyle.Bold;
-    //    }
-
-    //    // 2. 定义整个 Debug 面板的区域 (左上角, 宽 300, 动态高度)
-    //    int panelWidth = 250;
-    //    int rowHeight = 25;
-    //    int maxItems = Mathf.Min(displayTopN, emotionRanking.Count);
-    //    int panelHeight = 40 + (maxItems * rowHeight);
-
-    //    Rect panelRect = new Rect(10, 10, panelWidth, panelHeight);
-
-    //    // 绘制半透明黑底背景
-    //    GUI.color = new Color(0, 0, 0, 0.7f);
-    //    GUI.DrawTexture(panelRect, barTexture);
-    //    GUI.color = Color.white;
-
-    //    // 绘制标题
-    //    GUI.Label(new Rect(20, 15, 200, 20), "Realtime Emotion Ranking", labelStyle);
-
-    //    // 3. 遍历并绘制 Top N 的情绪数据
-    //    for (int i = 0; i < maxItems; i++)
-    //    {
-    //        EmotionScore score = emotionRanking[i];
-
-    //        float yPos = 40 + (i * rowHeight);
-
-    //        // A. 绘制情绪名称文本
-    //        GUI.Label(new Rect(20, yPos, 100, 20), score.emotion, labelStyle);
-
-    //        // B. 绘制百分比文本
-    //        string percentText = (score.probability * 100f).ToString("F1") + "%";
-    //        GUI.Label(new Rect(200, yPos, 50, 20), percentText, labelStyle);
-
-    //        // C. 绘制动态进度条 (最核心的可视化部分)
-    //        // 进度条最大宽度为 90 像素
-    //        float maxBarWidth = 90f;
-    //        float currentBarWidth = maxBarWidth * score.probability;
-    //        Rect barRect = new Rect(100, yPos + 5, currentBarWidth, 10);
-
-    //        // 根据排名给进度条上色 (第一名绿色，第二名黄色，其他灰色)
-    //        if (i == 0) GUI.color = Color.green;
-    //        else if (i == 1) GUI.color = Color.yellow;
-    //        else GUI.color = Color.gray;
-
-    //        // 画出进度条
-    //        GUI.DrawTexture(barRect, barTexture);
-
-    //        // 恢复默认颜色，防止影响下一次绘制
-    //        GUI.color = Color.white;
-    //    }
-    //}
 }

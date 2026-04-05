@@ -83,6 +83,19 @@ public class SelectCharacter : MonoBehaviour
                 
                 return;
             }
+
+            // convert mouse position from bottom-left based to top-left based
+            Vector2 guiMousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+
+            if (npcState != null && npcState.currentPanelRect.width > 0)
+            {
+                if (npcState.currentPanelRect.Contains(guiMousePos))
+                {
+                    clickingUI = true;
+                    return;
+                }
+            }
+
             clickingUI = false;
 
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
@@ -110,7 +123,7 @@ public class SelectCharacter : MonoBehaviour
                         sliderController.npcState = npcState;
                         npcState.controller.isSelecting = true;
 
-                        npcState.ShowNPCEmotion();
+                        //npcState.ShowNPCEmotion();
 
                         if (npcState.historyInputs.Count > 0)
                         {
@@ -119,6 +132,7 @@ public class SelectCharacter : MonoBehaviour
                                 input.SetActive(true);
                             }
                         }
+                        npcState.showOnGUI = true;
                         UpdatePersonalityTooltipText();
                         UpdateNPCSettingsSliderValue();
                         UpdatePlayerSettingsSliderValue();
@@ -184,7 +198,10 @@ public class SelectCharacter : MonoBehaviour
                 input.SetActive(false);
             }
         }
-        
+
+        npcState.showOnGUI = false;
+        npcState.onGuiIsExpanded = false;
+
         npcState.controller.isSelecting = false;
         npcState.controller.resetAnim = true;
 

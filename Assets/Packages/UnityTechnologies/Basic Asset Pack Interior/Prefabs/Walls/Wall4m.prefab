@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 5042380748437594471}
   - component: {fileID: 8552910553768257176}
   - component: {fileID: 6787113938111245992}
+  - component: {fileID: 8162104395330081469}
+  - component: {fileID: 1503355460800962479}
   m_Layer: 6
   m_Name: Wall4m
   m_TagString: Untagged
@@ -90,6 +92,34 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &8162104395330081469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 335715110992909045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eb9ecc7b3d25af4480e11e045fde4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadableWall
+  targetAlpha: 0.3
+  fadeSpeed: 5
+--- !u!114 &1503355460800962479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 335715110992909045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eb9ecc7b3d25af4480e11e045fde4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadableWall
+  targetAlpha: 0.3
+  fadeSpeed: 5
 --- !u!1 &778320209214622840
 GameObject:
   m_ObjectHideFlags: 0
@@ -101,6 +131,8 @@ GameObject:
   - component: {fileID: 9122220915069135739}
   - component: {fileID: 5920623234195235118}
   - component: {fileID: 8005292739837089974}
+  - component: {fileID: 5137240860914096846}
+  - component: {fileID: 5600146028397003787}
   m_Layer: 6
   m_Name: Wall4mSkirting
   m_TagString: Untagged
@@ -180,6 +212,34 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &5137240860914096846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 778320209214622840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eb9ecc7b3d25af4480e11e045fde4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadableWall
+  targetAlpha: 0.3
+  fadeSpeed: 5
+--- !u!114 &5600146028397003787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 778320209214622840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eb9ecc7b3d25af4480e11e045fde4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadableWall
+  targetAlpha: 0.3
+  fadeSpeed: 5
 --- !u!1 &6742185029309522318
 GameObject:
   m_ObjectHideFlags: 0
@@ -189,6 +249,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6258557884557376308}
+  - component: {fileID: 5227557978994865004}
   m_Layer: 6
   m_Name: Wall4m
   m_TagString: Untagged
@@ -206,10 +267,26 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.4099998, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5042380748437594471}
   - {fileID: 9122220915069135739}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!208 &5227557978994865004
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6742185029309522318}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 2, y: 0.5, z: 0.00001}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 2.11, y: 0, z: 0}
+  m_TimeToStationary: 0.5
