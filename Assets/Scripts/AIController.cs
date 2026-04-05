@@ -23,6 +23,9 @@ public class AIController : MonoBehaviour
     private int walkableMask;
     private float sqrStopRadius;
 
+    private string lastAnimTrigger = "Neutral";
+    private int activeTriggerHash = 0;
+
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -58,16 +61,31 @@ public class AIController : MonoBehaviour
         agent.isStopped = true;
         timer = 0f;
 
-        anim.SetBool(hashWalking, false);
+        //Debug.Log($"{animTrigger}");
+        if (anim.GetBool(hashWalking)) anim.SetBool(hashWalking, false);
 
-        if (animTrigger == "Neutral" || animTrigger == "Idle")
+        if (lastAnimTrigger != animTrigger)
         {
-            anim.SetBool(hashIdle, true);
-        }
-        else
-        {
-            anim.SetBool(hashIdle, false);
-            anim.SetBool(Animator.StringToHash(animTrigger), true);
+            // Pause last animation
+            if (activeTriggerHash != 0 && activeTriggerHash != hashIdle && activeTriggerHash != hashWalking)
+            {
+                anim.SetBool(activeTriggerHash, false);
+            }
+
+            lastAnimTrigger = animTrigger;
+
+            if (animTrigger == "Neutral" || animTrigger == "Idle")
+            {
+                if (!anim.GetBool(hashIdle)) anim.SetBool(hashIdle, true);
+                activeTriggerHash = hashIdle;
+            }
+            else
+            {
+                anim.SetBool(hashIdle, false);
+
+                activeTriggerHash = Animator.StringToHash(animTrigger);
+                anim.SetBool(activeTriggerHash, true);
+            }
         }
     }
 
@@ -75,10 +93,11 @@ public class AIController : MonoBehaviour
     {
         agent.isStopped = false;
 
-        // Clear previous animation state
-        if (animTrigger != "Neutral")
+        if (activeTriggerHash != 0 && activeTriggerHash != hashIdle && activeTriggerHash != hashWalking)
         {
-            anim.SetBool(Animator.StringToHash(animTrigger), false);
+            anim.SetBool(activeTriggerHash, false);
+            activeTriggerHash = 0;       // Clear Hash
+            lastAnimTrigger = "Neutral"; 
         }
 
         if (resetAnim)
@@ -90,8 +109,9 @@ public class AIController : MonoBehaviour
 
         if (IsAgentDone())
         {
-            anim.SetBool(hashIdle, true);
-            anim.SetBool(hashWalking, false);
+            if (!anim.GetBool(hashIdle)) anim.SetBool(hashIdle, true);
+            if (anim.GetBool(hashWalking)) anim.SetBool(hashWalking, false);
+            activeTriggerHash = hashIdle;
 
             timer += Time.deltaTime;
             if (timer >= intervalTime)

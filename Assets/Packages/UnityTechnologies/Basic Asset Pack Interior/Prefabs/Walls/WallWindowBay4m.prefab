@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8801518006989473337}
   - component: {fileID: 6809271742745222478}
   - component: {fileID: 5107634878221153503}
+  - component: {fileID: 2331807008095315611}
   m_Layer: 6
   m_Name: WallWindowBay4mCeling
   m_TagString: Untagged
@@ -90,6 +91,20 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2331807008095315611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 639716401636349220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eb9ecc7b3d25af4480e11e045fde4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadableWall
+  targetAlpha: 0.3
+  fadeSpeed: 5
 --- !u!1 &3931940918357175979
 GameObject:
   m_ObjectHideFlags: 0
@@ -101,6 +116,7 @@ GameObject:
   - component: {fileID: 2621055091893652139}
   - component: {fileID: 7234656684896586071}
   - component: {fileID: 2666417221110561877}
+  - component: {fileID: 2754011229514964813}
   m_Layer: 6
   m_Name: WindowBayGlass4m
   m_TagString: Untagged
@@ -180,6 +196,20 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2754011229514964813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3931940918357175979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eb9ecc7b3d25af4480e11e045fde4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadableWall
+  targetAlpha: 0.3
+  fadeSpeed: 5
 --- !u!1 &4022545099923812195
 GameObject:
   m_ObjectHideFlags: 0
@@ -281,6 +311,7 @@ GameObject:
   - component: {fileID: 5941079164141590655}
   - component: {fileID: 958029265979024993}
   - component: {fileID: 8807870284690021286}
+  - component: {fileID: 5951092244263854241}
   m_Layer: 6
   m_Name: WallWindowBay4m
   m_TagString: Untagged
@@ -360,6 +391,20 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &5951092244263854241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4925387228940507283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eb9ecc7b3d25af4480e11e045fde4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadableWall
+  targetAlpha: 0.3
+  fadeSpeed: 5
 --- !u!1 &7643397894282542631
 GameObject:
   m_ObjectHideFlags: 0
@@ -371,6 +416,7 @@ GameObject:
   - component: {fileID: 2683284144984873374}
   - component: {fileID: 8008508338850232154}
   - component: {fileID: 2030723272047921513}
+  - component: {fileID: 8523344446935993777}
   m_Layer: 6
   m_Name: WindowBayFrame4m
   m_TagString: Untagged
@@ -450,6 +496,20 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &8523344446935993777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7643397894282542631}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eb9ecc7b3d25af4480e11e045fde4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadableWall
+  targetAlpha: 0.3
+  fadeSpeed: 5
 --- !u!1 &8387854135262613240
 GameObject:
   m_ObjectHideFlags: 0
@@ -461,6 +521,7 @@ GameObject:
   - component: {fileID: 8790476667169087801}
   - component: {fileID: 1107802959074035889}
   - component: {fileID: 2613483776498188261}
+  - component: {fileID: 8399066388033201337}
   m_Layer: 6
   m_Name: WallWindowBay4mSkirting
   m_TagString: Untagged
@@ -540,6 +601,20 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &8399066388033201337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8387854135262613240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eb9ecc7b3d25af4480e11e045fde4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadableWall
+  targetAlpha: 0.3
+  fadeSpeed: 5
 --- !u!1 &8500586381493956694
 GameObject:
   m_ObjectHideFlags: 0
@@ -657,10 +732,54 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1989617146762761045, guid: 42d01a673d17e624995eb1892ca9f067, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 927385753878118082}
+    - targetCorrespondingSourceObject: {fileID: 2432096183101497955, guid: 42d01a673d17e624995eb1892ca9f067, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1928353343903612996}
   m_SourcePrefab: {fileID: 100100000, guid: 42d01a673d17e624995eb1892ca9f067, type: 3}
+--- !u!1 &673335293280650271 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1989617146762761045, guid: 42d01a673d17e624995eb1892ca9f067, type: 3}
+  m_PrefabInstance: {fileID: 1352382403035273034}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &927385753878118082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673335293280650271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eb9ecc7b3d25af4480e11e045fde4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadableWall
+  targetAlpha: 0.3
+  fadeSpeed: 5
 --- !u!4 &1535192956264607905 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 42d01a673d17e624995eb1892ca9f067, type: 3}
   m_PrefabInstance: {fileID: 1352382403035273034}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3676109611019089193 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2432096183101497955, guid: 42d01a673d17e624995eb1892ca9f067, type: 3}
+  m_PrefabInstance: {fileID: 1352382403035273034}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1928353343903612996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3676109611019089193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eb9ecc7b3d25af4480e11e045fde4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadableWall
+  targetAlpha: 0.3
+  fadeSpeed: 5
