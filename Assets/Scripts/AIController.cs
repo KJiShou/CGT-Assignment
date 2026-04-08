@@ -82,9 +82,24 @@ public class AIController : MonoBehaviour
             else
             {
                 anim.SetBool(hashIdle, false);
-
                 activeTriggerHash = Animator.StringToHash(animTrigger);
-                anim.SetBool(activeTriggerHash, true);
+                bool hasParam = false;
+                foreach (var param in anim.parameters)
+                {
+                    if (param.nameHash == activeTriggerHash)
+                    {
+                        hasParam = true;
+                        break;
+                    }
+                }
+
+                if (hasParam)
+                {
+                    anim.SetBool(activeTriggerHash, true);
+                }else
+                {
+                    Debug.Log("No Animation Provided");
+                }
             }
         }
     }
