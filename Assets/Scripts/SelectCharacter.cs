@@ -179,8 +179,8 @@ public class SelectCharacter : MonoBehaviour
             longTermMoodASlider.value = npcState.longTermMood.y;
             longTermMoodDSlider.value = npcState.longTermMood.z;
             
-            currentEmotionText.text = $"Tag: {npcState.currentEmotionTag}";
-            longTermMoodText.text = $"Tag: {npcState.longTermMoodTag}";
+            //currentEmotionText.text = $"Tag: {npcState.currentEmotionTag}";
+            //longTermMoodText.text = $"Tag: {npcState.longTermMoodTag}";
         }
 
         opennessValue.text = $"Openness\n({npcState.personality.openness:F2})";
