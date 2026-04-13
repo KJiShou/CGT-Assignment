@@ -37,8 +37,25 @@ public class SliderController : MonoBehaviour
     public TextMeshProUGUI maxInputHistoryText;
     public Slider maxInputHistorySlider;
 
+    [Header("Player Settings Panel")]
+    [Tooltip("Reference to the Player Settings panel GameObject")]
+    public GameObject playerSettingsPanel;
+    private bool isPlayerSettingsVisible = true;
+
     [HideInInspector]
     public NPCDoubleDecay npcState;
+
+    /// <summary>
+    /// [UI Simplification] Toggle Player Settings panel visibility via gear icon
+    /// </summary>
+    public void TogglePlayerSettings()
+    {
+        if (playerSettingsPanel != null)
+        {
+            isPlayerSettingsVisible = !isPlayerSettingsVisible;
+            playerSettingsPanel.SetActive(isPlayerSettingsVisible);
+        }
+    }
 
     public void MemoryForgetRateOnChanged(float value)
     {

@@ -154,6 +154,7 @@ public class NPCDoubleDecay : MonoBehaviour
         [Range(0, 1)] public float probability;
     }
     public List<EmotionScore> emotionRanking;
+    public List<EmotionScore> longTermEmotionRanking;
 
     private void Start()
     {
@@ -199,9 +200,12 @@ public class NPCDoubleDecay : MonoBehaviour
         }
     }
 
-    private string Classify(Vector3 currentVad)
+    /// <summary>
+    /// Classify VAD into emotion probabilities and store to outputList
+    /// </summary>
+    private void ClassifyToList(Vector3 vad, List<EmotionScore> outputList)
     {
-        if (EmotionClassifier.instance.emotionDefinitions == null || EmotionClassifier.instance.emotionDefinitions.Count == 0) return "Unknown";
+        if (EmotionClassifier.instance.emotionDefinitions == null || EmotionClassifier.instance.emotionDefinitions.Count == 0) return;
 
         int count = EmotionClassifier.instance.emotionDefinitions.Count;
         float[] logits = new float[count];
@@ -209,36 +213,30 @@ public class NPCDoubleDecay : MonoBehaviour
         // Calculate points
         for (int i = 0; i < count; i++)
         {
-            float distance = Vector3.Distance(currentVad, EmotionClassifier.instance.emotionDefinitions[i].vadCentroid);
-
-            // closer can get higher point
+            float distance = Vector3.Distance(vad, EmotionClassifier.instance.emotionDefinitions[i].vadCentroid);
             logits[i] = 1.0f / (1.0f + distance);
         }
 
-        // 2. Softmax
+        // Softmax
         float[] probabilities = Softmax(logits);
 
-        emotionRanking.Clear();
+        outputList.Clear();
 
         for (int i = 0; i < count; i++)
         {
             string eName = EmotionClassifier.instance.emotionDefinitions[i].emotionName;
             float prob = probabilities[i];
-
-            emotionRanking.Add(new EmotionScore { emotion = eName, probability = prob });
+            outputList.Add(new EmotionScore { emotion = eName, probability = prob });
         }
 
-        // sort ascendingly
-        emotionRanking.Sort((a, b) => b.probability.CompareTo(a.probability));
-        //foreach (var emotion in emotionRanking)
-        //{
-        //    Debug.Log($"{emotion.emotion.ToString()}: {emotion.probability.ToString()}");
-        //}
-        // find the highest scores
-        string maxEmotion = emotionRanking[0].emotion;
-        // Debug.Log($"<color=green>NPC feels {currentEmotion} ({Time.time})</color>");
+        // sort descending by probability
+        outputList.Sort((a, b) => b.probability.CompareTo(a.probability));
+    }
 
-        return maxEmotion;
+    private string Classify(Vector3 currentVad)
+    {
+        ClassifyToList(currentVad, emotionRanking);
+        return emotionRanking.Count > 0 ? emotionRanking[0].emotion : "Unknown";
     }
 
     private float[] Softmax(float[] logits)
@@ -418,6 +416,8 @@ public class NPCDoubleDecay : MonoBehaviour
         if (emotionHistory.Count == 0)
         {
             longTermMood = Vector3.zero;
+            longTermMoodTag = "Neutral";
+            longTermEmotionRanking?.Clear();
             return;
         }
 
@@ -453,6 +453,10 @@ public class NPCDoubleDecay : MonoBehaviour
         longTermMood.x = Mathf.Clamp(longTermMood.x, -1f, 1f);
         longTermMood.y = Mathf.Clamp(longTermMood.y, -1f, 1f);
         longTermMood.z = Mathf.Clamp(longTermMood.z, -1f, 1f);
+
+        // Compute long-term emotion ranking
+        ClassifyToList(longTermMood, longTermEmotionRanking);
+        longTermMoodTag = longTermEmotionRanking.Count > 0 ? longTermEmotionRanking[0].emotion : "Neutral";
     }
 
     [ContextMenu("Clear Emotion History")]
@@ -461,6 +465,7 @@ public class NPCDoubleDecay : MonoBehaviour
         emotionHistory.Clear();
         longTermMood = Vector3.zero;
         longTermMoodTag = "Neutral";
+        longTermEmotionRanking?.Clear();
         currentEmotion = Vector3.zero;
         finalEmotion = Vector3.zero;
         finalEmotionTag = "Neutral";
@@ -494,7 +499,7 @@ public class NPCDoubleDecay : MonoBehaviour
 
     public bool onGuiIsExpanded = false;
 
-    public float posX = 40f;
+    public float posX = 0f; // Offset from right edge (negative = left, positive = right)
     public float posY = 90f;
 
     [HideInInspector]
@@ -520,10 +525,20 @@ public class NPCDoubleDecay : MonoBehaviour
         // define panel area
         int panelWidth = 300;
         int rowHeight = 25;
-        int maxItems = onGuiIsExpanded ? emotionRanking.Count : Mathf.Min(displayTopN, emotionRanking.Count);
-        int panelHeight = 40 + (maxItems * rowHeight);
+        int sectionGap = 8;
+        int labelHeight = 20;
+        int displayCount = onGuiIsExpanded ? Mathf.Min(displayTopN, emotionRanking.Count) : 1;
+        int longTermDisplayCount = onGuiIsExpanded ? (longTermEmotionRanking != null ? Mathf.Min(displayTopN, longTermEmotionRanking.Count) : 0) : 1;
 
-        currentPanelRect = new Rect(posX, posY, panelWidth, panelHeight);
+        // When collapsed: title + button + 2 rows (current + longterm top 1 each)
+        // When expanded: title + button + header + current list + header + longterm list
+        int collapsedHeight = 40 + (4 * rowHeight) + sectionGap;
+        int expandedHeight = 40 + sectionGap + labelHeight + (displayCount * rowHeight) + sectionGap + labelHeight + (longTermDisplayCount * rowHeight) + sectionGap;
+        int panelHeight = onGuiIsExpanded ? expandedHeight : collapsedHeight;
+
+        float rightBaseX = Screen.width - 340f; // 300 panel + 40 margin
+        float panelY = (Screen.height * 0.2f) + posY;
+        currentPanelRect = new Rect(rightBaseX + posX, panelY, panelWidth, panelHeight);
 
         // half transparent black background
         GUI.color = new Color(0, 0, 0, 0.7f);
@@ -531,42 +546,83 @@ public class NPCDoubleDecay : MonoBehaviour
         GUI.color = Color.white;
 
         // Title
-        GUI.Label(new Rect((posX + 10f), (posY + 8f), 200, 20), "Realtime Emotion Ranking", labelStyle);
+        GUI.Label(new Rect((currentPanelRect.x + 10f), (panelY + 8f), 200, 20), "Emotion Ranking", labelStyle);
 
-        string buttonText = onGuiIsExpanded ? "Collapse" : "Expand All";
-        if (GUI.Button(new Rect(posX + 220f, posY + 5f, 75f, 20f), buttonText))
+        string buttonText = onGuiIsExpanded ? "Collapse" : "Expand";
+        if (GUI.Button(new Rect(currentPanelRect.x + 220f, panelY + 5f, 75f, 20f), buttonText))
         {
-            // button onClick
             onGuiIsExpanded = !onGuiIsExpanded;
         }
 
-        for (int i = 0; i < maxItems; i++)
+        float yOffset = 40;
+
+        // ========== Current Emotion Section ==========
+        GUI.Label(new Rect(currentPanelRect.x + 10f, panelY + yOffset, 200, labelHeight), "Current:", labelStyle);
+        yOffset += labelHeight;
+
+        for (int i = 0; i < displayCount; i++)
         {
             EmotionScore score = emotionRanking[i];
-
-            float yPos = (40 + (i * rowHeight)) + posY;
+            float yPos = (yOffset + (i * rowHeight)) + panelY;
 
             // Emotion name
-            GUI.Label(new Rect((posX + 20), yPos, 100, 20), score.emotion, labelStyle);
+            GUI.Label(new Rect((currentPanelRect.x + 20), yPos, 100, 20), score.emotion, labelStyle);
 
             // Percentage
             string percentText = (score.probability * 100f).ToString("F1") + "%";
-            GUI.Label(new Rect((posX + 200), yPos, 50, 20), percentText, labelStyle);
+            GUI.Label(new Rect((currentPanelRect.x + 200), yPos, 50, 20), percentText, labelStyle);
 
             // Dynamic progress bar
-            // max width is 90px
             float maxBarWidth = 90f;
             float currentBarWidth = maxBarWidth * score.probability;
-            Rect barRect = new Rect((posX + 150), yPos + 5, currentBarWidth, 10);
+            Rect barRect = new Rect((currentPanelRect.x + 150), yPos + 5, currentBarWidth, 10);
 
-            // rank first = green color, rank second = yellow, others = grey
             if (i == 0) GUI.color = Color.green;
             else if (i == 1) GUI.color = Color.yellow;
             else GUI.color = Color.gray;
 
             GUI.DrawTexture(barRect, barTexture);
-
             GUI.color = Color.white;
+        }
+
+        yOffset += (displayCount * rowHeight) + sectionGap;
+
+        // ========== Long Term Mood Section ==========
+        GUI.Label(new Rect(currentPanelRect.x + 10f, panelY + yOffset, 200, labelHeight), "Long Term:", labelStyle);
+        yOffset += labelHeight;
+
+        if (longTermEmotionRanking != null && longTermEmotionRanking.Count > 0)
+        {
+            for (int i = 0; i < longTermDisplayCount; i++)
+            {
+                EmotionScore score = longTermEmotionRanking[i];
+                float yPos = (yOffset + (i * rowHeight)) + panelY;
+
+                // Emotion name
+                GUI.Label(new Rect((currentPanelRect.x + 20), yPos, 100, 20), score.emotion, labelStyle);
+
+                // Percentage
+                string percentText = (score.probability * 100f).ToString("F1") + "%";
+                GUI.Label(new Rect((currentPanelRect.x + 200), yPos, 50, 20), percentText, labelStyle);
+
+                // Dynamic progress bar
+                float maxBarWidth = 90f;
+                float currentBarWidth = maxBarWidth * score.probability;
+                Rect barRect = new Rect((currentPanelRect.x + 150), yPos + 5, currentBarWidth, 10);
+
+                if (i == 0) GUI.color = Color.cyan;
+                else if (i == 1) GUI.color = Color.magenta;
+                else GUI.color = Color.gray;
+
+                GUI.DrawTexture(barRect, barTexture);
+                GUI.color = Color.white;
+            }
+        }
+        else
+        {
+            // No long-term data yet
+            float yPos = (yOffset) + panelY;
+            GUI.Label(new Rect((currentPanelRect.x + 20), yPos, 150, 20), "No data", labelStyle);
         }
     }
 }
