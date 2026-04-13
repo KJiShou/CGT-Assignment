@@ -21,9 +21,13 @@ public class SelectCharacter : MonoBehaviour
     [SerializeField] TextMeshProUGUI agreeablenessValue;
     [SerializeField] TextMeshProUGUI neuroticismValue;
     [SerializeField] GameObject toggleablePanel;
-    [SerializeField] TextMeshProUGUI currentEmotionVAD;
+    [SerializeField] Slider currentEmotionVSlider;
+    [SerializeField] Slider currentEmotionASlider;
+    [SerializeField] Slider currentEmotionDSlider;
     [SerializeField] TextMeshProUGUI currentEmotionText;
-    [SerializeField] TextMeshProUGUI longTermMoodVAD;
+    [SerializeField] Slider longTermMoodVSlider;
+    [SerializeField] Slider longTermMoodASlider;
+    [SerializeField] Slider longTermMoodDSlider;
     [SerializeField] TextMeshProUGUI longTermMoodText;
 
     [Header("Marker Settings")]
@@ -168,11 +172,15 @@ public class SelectCharacter : MonoBehaviour
 
         if (emotionPanel.activeSelf)
         {
-            currentEmotionVAD.text = $"Valence: {npcState.currentEmotion.x:F2},\nArousal: {npcState.currentEmotion.y:F2}\nDominance: {npcState.currentEmotion.z:F2}";
-            longTermMoodVAD.text = $"Valence: {npcState.longTermMood.x:F2},\nArousal: {npcState.longTermMood.y:F2}\nDominance: {npcState.longTermMood.z:F2}";
+            currentEmotionVSlider.value = npcState.currentEmotion.x;
+            currentEmotionASlider.value = npcState.currentEmotion.y;
+            currentEmotionDSlider.value = npcState.currentEmotion.z;
+            longTermMoodVSlider.value = npcState.longTermMood.x;
+            longTermMoodASlider.value = npcState.longTermMood.y;
+            longTermMoodDSlider.value = npcState.longTermMood.z;
             
-            currentEmotionText.text = $"Tag: {npcState.currentEmotionTag}";
-            longTermMoodText.text = $"Tag: {npcState.longTermMoodTag}";
+            //currentEmotionText.text = $"Tag: {npcState.currentEmotionTag}";
+            //longTermMoodText.text = $"Tag: {npcState.longTermMoodTag}";
         }
 
         opennessValue.text = $"Openness\n({npcState.personality.openness:F2})";
