@@ -114,10 +114,10 @@ public class AIController : MonoBehaviour
 
         if (lastAnimTrigger != animTrigger)
         {
-            // if (animTrigger != "Idle" && animTrigger != "Neutral")
-            // {
-            //     TriggerEmoji(animTrigger);
-            // }
+            if (animTrigger != "Idle" && animTrigger != "Neutral")
+            {
+                TriggerEmoji(animTrigger);
+            }
 
             // Pause last animation
             if (activeTriggerHash != 0 && activeTriggerHash != hashIdle && activeTriggerHash != hashWalking)
@@ -139,7 +139,7 @@ public class AIController : MonoBehaviour
             }
             else
             {
-                TriggerEmoji(animTrigger);
+                //TriggerEmoji(animTrigger);
                 anim.SetBool(hashIdle, false);
                 activeTriggerHash = Animator.StringToHash(animTrigger);
                 bool hasParam = false;
@@ -181,6 +181,11 @@ public class AIController : MonoBehaviour
     private void HandleRoamingState()
     {
         agent.isStopped = false;
+
+        if (emojiVFX != null)
+        {
+            emojiVFX.StopEmoji();
+        }
 
         if (activeTriggerHash != 0 && activeTriggerHash != hashIdle && activeTriggerHash != hashWalking)
         {
