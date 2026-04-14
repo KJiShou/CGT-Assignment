@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
+using System.Collections.Generic;
 
 public class AIController : MonoBehaviour
 {
@@ -26,10 +27,14 @@ public class AIController : MonoBehaviour
     private string lastAnimTrigger = "Neutral";
     private int activeTriggerHash = 0;
 
+    public EmotionEmojiVFX emojiVFX;
+    private Dictionary<string, int> emotionMap;
+
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
+        emojiVFX = GetComponentInChildren<EmotionEmojiVFX>();
 
         // if not specific centerPoint, use NPC transform as center point
         if (centerPoint == null)
@@ -42,6 +47,49 @@ public class AIController : MonoBehaviour
         walkableMask = 1 << NavMesh.GetAreaFromName("Walkable");
 
         sqrStopRadius = stopRadius * stopRadius;
+        
+        emotionMap = new Dictionary<string, int>()
+        {
+            // Joy
+            {"Serenity", 0},
+            {"Joy", 1},
+            {"Ecstasy", 2},
+
+            // Trust
+            {"Acceptance", 3},
+            {"Trust", 4},
+            {"Admiration", 5},
+
+            // Fear
+            {"Apprehension", 6},
+            {"Fear", 7},
+            {"Terror", 8},
+
+            // Surprise
+            {"Distraction", 9},
+            {"Surprise", 10},
+            {"Amazement", 11},
+
+            // Sadness
+            {"Pensiveness", 12},
+            {"Sadness", 13},
+            {"Grief", 14},
+
+            // Disgust
+            {"Boredom", 15},
+            {"Disgust", 16},
+            {"Loathing", 17},
+
+            // Anger
+            {"Annoyance", 18},
+            {"Anger", 19},
+            {"Rage", 20},
+
+            // Anticipation
+            {"Interest", 21},
+            {"Anticipation", 22},
+            {"Vigilance", 23}
+        };
     }
 
     private void Update()
@@ -66,6 +114,11 @@ public class AIController : MonoBehaviour
 
         if (lastAnimTrigger != animTrigger)
         {
+            // if (animTrigger != "Idle" && animTrigger != "Neutral")
+            // {
+            //     TriggerEmoji(animTrigger);
+            // }
+
             // Pause last animation
             if (activeTriggerHash != 0 && activeTriggerHash != hashIdle && activeTriggerHash != hashWalking)
             {
@@ -78,9 +131,15 @@ public class AIController : MonoBehaviour
             {
                 if (!anim.GetBool(hashIdle)) anim.SetBool(hashIdle, true);
                 activeTriggerHash = hashIdle;
+
+                if (emojiVFX != null)
+                {
+                    emojiVFX.StopEmoji();
+                }
             }
             else
             {
+                TriggerEmoji(animTrigger);
                 anim.SetBool(hashIdle, false);
                 activeTriggerHash = Animator.StringToHash(animTrigger);
                 bool hasParam = false;
@@ -101,6 +160,21 @@ public class AIController : MonoBehaviour
                     Debug.Log("No Animation Provided");
                 }
             }
+        }
+    }
+
+    void TriggerEmoji(string emotion)
+    {
+        if (emojiVFX == null) return;
+
+        if (emotionMap.ContainsKey(emotion))
+        {
+            int index = emotionMap[emotion];
+            emojiVFX.PlayEmoji(index);
+        }
+        else
+        {
+            Debug.Log("Emotion not found: " + emotion);
         }
     }
 
