@@ -24,11 +24,15 @@ public class SelectCharacter : MonoBehaviour
     [SerializeField] Slider currentEmotionVSlider;
     [SerializeField] Slider currentEmotionASlider;
     [SerializeField] Slider currentEmotionDSlider;
-    [SerializeField] TextMeshProUGUI currentEmotionText;
+    [SerializeField] TextMeshProUGUI currentEmotionVText;
+    [SerializeField] TextMeshProUGUI currentEmotionAText;
+    [SerializeField] TextMeshProUGUI currentEmotionDText;
     [SerializeField] Slider longTermMoodVSlider;
     [SerializeField] Slider longTermMoodASlider;
     [SerializeField] Slider longTermMoodDSlider;
-    [SerializeField] TextMeshProUGUI longTermMoodText;
+    [SerializeField] TextMeshProUGUI longTermMoodVText;
+    [SerializeField] TextMeshProUGUI longTermMoodAText;
+    [SerializeField] TextMeshProUGUI longTermMoodDText;
 
     [Header("Marker Settings")]
     [SerializeField] GameObject marker;
@@ -178,9 +182,9 @@ public class SelectCharacter : MonoBehaviour
             longTermMoodVSlider.value = npcState.longTermMood.x;
             longTermMoodASlider.value = npcState.longTermMood.y;
             longTermMoodDSlider.value = npcState.longTermMood.z;
-            
-            //currentEmotionText.text = $"Tag: {npcState.currentEmotionTag}";
-            //longTermMoodText.text = $"Tag: {npcState.longTermMoodTag}";
+
+            UpdateCurrentEmotionVADText();
+            UpdateLongTermMoodVADText();
         }
 
         opennessValue.text = $"Openness\n({npcState.personality.openness:F2})";
@@ -259,6 +263,72 @@ public class SelectCharacter : MonoBehaviour
             marker.SetActive(false);
             marker.transform.SetParent(null);
         }
+    }
+
+    private void UpdateCurrentEmotionVADText()
+    {
+        if (npcState == null) return;
+
+        if (currentEmotionVText != null)
+            currentEmotionVText.text = $"{npcState.currentEmotion.x:F2}";
+        if (currentEmotionAText != null)
+            currentEmotionAText.text = $"{npcState.currentEmotion.y:F2}";
+        if (currentEmotionDText != null)
+            currentEmotionDText.text = $"{npcState.currentEmotion.z:F2}";
+    }
+
+    private void UpdateLongTermMoodVADText()
+    {
+        if (npcState == null) return;
+
+        if (longTermMoodVText != null)
+            longTermMoodVText.text = $"{npcState.longTermMood.x:F2}";
+        if (longTermMoodAText != null)
+            longTermMoodAText.text = $"{npcState.longTermMood.y:F2}";
+        if (longTermMoodDText != null)
+            longTermMoodDText.text = $"{npcState.longTermMood.z:F2}";
+    }
+
+    public void OnCurrentEmotionVChanged(float value)
+    {
+        if (npcState == null) return;
+        npcState.currentEmotion.x = value;
+        UpdateCurrentEmotionVADText();
+    }
+
+    public void OnCurrentEmotionAChanged(float value)
+    {
+        if (npcState == null) return;
+        npcState.currentEmotion.y = value;
+        UpdateCurrentEmotionVADText();
+    }
+
+    public void OnCurrentEmotionDChanged(float value)
+    {
+        if (npcState == null) return;
+        npcState.currentEmotion.z = value;
+        UpdateCurrentEmotionVADText();
+    }
+
+    public void OnLongTermMoodVChanged(float value)
+    {
+        if (npcState == null) return;
+        npcState.longTermMood.x = value;
+        UpdateLongTermMoodVADText();
+    }
+
+    public void OnLongTermMoodAChanged(float value)
+    {
+        if (npcState == null) return;
+        npcState.longTermMood.y = value;
+        UpdateLongTermMoodVADText();
+    }
+
+    public void OnLongTermMoodDChanged(float value)
+    {
+        if (npcState == null) return;
+        npcState.longTermMood.z = value;
+        UpdateLongTermMoodVADText();
     }
 
     private void UpdateNPCSettingsSliderValue()
