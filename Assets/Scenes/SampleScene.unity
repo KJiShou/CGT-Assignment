@@ -43106,7 +43106,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5248f5de513c68243914d228481ff89c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EmotionEmojiVFX
-  ps: {fileID: 699386922}
+  ps: {fileID: 1977406316}
   emojiMaterials:
   - {fileID: 2100000, guid: bd4fbf1b2f01ab945a46b091a61d2fbd, type: 2}
   - {fileID: 2100000, guid: e39f7ff942875d047a95bb628d72e0de, type: 2}
