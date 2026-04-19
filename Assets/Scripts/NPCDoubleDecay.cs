@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -263,7 +264,17 @@ public class NPCDoubleDecay : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(message)) return;
 
-        Vector3 rawInput = TwitterSentimentVAD.instance.Analyze(message);
+        StartCoroutine(ProcessMessageRoutine(message));
+    }
+
+    private IEnumerator ProcessMessageRoutine(string message)
+    {
+        Vector3 rawInput = Vector3.zero;
+
+        // Non-blocking call - yields to allow other messages to queue
+        var waitForInput = TwitterSentimentVAD.instance.AnalyzeRoutine(message, result => rawInput = result);
+        yield return waitForInput;
+
         Vector3 processedInput = ProcessInput(rawInput);
 
         Vector3 sensitivity = personality.GetReactivityMultiplier(processedInput);
@@ -528,17 +539,13 @@ public class NPCDoubleDecay : MonoBehaviour
         int sectionGap = 8;
         int labelHeight = 20;
         int displayCount = onGuiIsExpanded ? Mathf.Min(displayTopN, emotionRanking.Count) : 1;
-        int longTermDisplayCount = onGuiIsExpanded ? (longTermEmotionRanking != null ? Mathf.Min(displayTopN, longTermEmotionRanking.Count) : 0) : 1;
 
-        // When collapsed: title + button + 2 rows (current + longterm top 1 each)
-        // When expanded: title + button + header + current list + header + longterm list
         int collapsedHeight = 40 + (4 * rowHeight) + sectionGap;
-        int expandedHeight = 40 + sectionGap + labelHeight + (displayCount * rowHeight) + sectionGap + labelHeight + (longTermDisplayCount * rowHeight) + sectionGap;
+        int expandedHeight = 40 + sectionGap + labelHeight + (displayCount * rowHeight) + sectionGap + labelHeight + rowHeight + sectionGap; // longterm shows only top 1
         int panelHeight = onGuiIsExpanded ? expandedHeight : collapsedHeight;
 
-        float rightBaseX = Screen.width - 340f; // 300 panel + 40 margin
-        float panelY = (Screen.height * 0.2f) + posY;
-        currentPanelRect = new Rect(rightBaseX + posX, panelY, panelWidth, panelHeight);
+        float panelY = (Screen.height * 0.10f) + posY; // 10% from top
+        currentPanelRect = new Rect(posX, panelY, panelWidth, panelHeight);
 
         // half transparent black background
         GUI.color = new Color(0, 0, 0, 0.7f);
@@ -587,42 +594,40 @@ public class NPCDoubleDecay : MonoBehaviour
 
         yOffset += (displayCount * rowHeight) + sectionGap;
 
-        // ========== Long Term Mood Section ==========
+        // ========== Long Term Mood Section (Top 1 only) ==========
         GUI.Label(new Rect(currentPanelRect.x + 10f, panelY + yOffset, 200, labelHeight), "Long Term:", labelStyle);
         yOffset += labelHeight;
 
         if (longTermEmotionRanking != null && longTermEmotionRanking.Count > 0)
         {
-            for (int i = 0; i < longTermDisplayCount; i++)
-            {
-                EmotionScore score = longTermEmotionRanking[i];
-                float yPos = (yOffset + (i * rowHeight)) + panelY;
+            // Show only top 1 emotion
+            EmotionScore score = longTermEmotionRanking[0];
+            float yPos = (yOffset) + panelY;
 
-                // Emotion name
-                GUI.Label(new Rect((currentPanelRect.x + 20), yPos, 100, 20), score.emotion, labelStyle);
+            // Emotion name
+            GUI.Label(new Rect((currentPanelRect.x + 20), yPos, 100, 20), score.emotion, labelStyle);
 
-                // Percentage
-                string percentText = (score.probability * 100f).ToString("F1") + "%";
-                GUI.Label(new Rect((currentPanelRect.x + 200), yPos, 50, 20), percentText, labelStyle);
+            // Percentage
+            string percentText = (score.probability * 100f).ToString("F1") + "%";
+            GUI.Label(new Rect((currentPanelRect.x + 200), yPos, 50, 20), percentText, labelStyle);
 
-                // Dynamic progress bar
-                float maxBarWidth = 90f;
-                float currentBarWidth = maxBarWidth * score.probability;
-                Rect barRect = new Rect((currentPanelRect.x + 150), yPos + 5, currentBarWidth, 10);
+            // Dynamic progress bar
+            float maxBarWidth = 90f;
+            float currentBarWidth = maxBarWidth * score.probability;
+            Rect barRect = new Rect((currentPanelRect.x + 150), yPos + 5, currentBarWidth, 10);
 
-                if (i == 0) GUI.color = Color.cyan;
-                else if (i == 1) GUI.color = Color.magenta;
-                else GUI.color = Color.gray;
+            GUI.color = Color.cyan;
+            GUI.DrawTexture(barRect, barTexture);
+            GUI.color = Color.white;
 
-                GUI.DrawTexture(barRect, barTexture);
-                GUI.color = Color.white;
-            }
+            yOffset += rowHeight; // Only one row for long term
         }
         else
         {
             // No long-term data yet
             float yPos = (yOffset) + panelY;
             GUI.Label(new Rect((currentPanelRect.x + 20), yPos, 150, 20), "No data", labelStyle);
+            yOffset += rowHeight;
         }
     }
 }
