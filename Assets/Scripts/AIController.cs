@@ -155,8 +155,16 @@ public class AIController : MonoBehaviour
                 if (hasParam)
                 {
                     anim.SetBool(activeTriggerHash, true);
-                }else
+                }
+                else
                 {
+                    if (!anim.GetBool(hashIdle)) anim.SetBool(hashIdle, true);
+                    activeTriggerHash = hashIdle;
+
+                    if (emojiVFX != null)
+                    {
+                        emojiVFX.StopEmoji();
+                    }
                     Debug.Log("No Animation Provided");
                 }
             }

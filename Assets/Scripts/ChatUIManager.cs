@@ -9,6 +9,8 @@ public class ChatUIManager : MonoBehaviour
     public TMP_InputField playerInputField;
     public GameObject playerMessagePrefab;
     public Transform playerMessageParentTransform;
+    public TMP_InputField debugInputField;
+    public TextMeshProUGUI debugErrorMessage;
 
     public TextMeshProUGUI inputCount;
     public TextMeshProUGUI npcEmotionCount;
@@ -76,6 +78,15 @@ public class ChatUIManager : MonoBehaviour
 
         playerInputField.text = "";
         _targetNPC.ReceivePlayerMessage(message);
+    }
+
+    public void TriggerTestEmotion()
+    {
+        string message = debugInputField.text.Trim();
+        if (string.IsNullOrEmpty(message) || _targetNPC == null) return;
+        debugInputField.text = "";
+        _targetNPC.testEmotionName = message;
+        debugErrorMessage.text = _targetNPC.TriggerTestEmotion();
     }
 
     private void OnNPCReacted(string originalMessage, Vector3 trendVAD, string currentTrend, Vector3 inputVAD)

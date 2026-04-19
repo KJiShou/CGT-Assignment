@@ -18,7 +18,7 @@ public class SettingsController : MonoBehaviour
     public bool isOpen
     {
         get { return _isOpen; }
-        private set { isOpen = value; }
+        private set { _isOpen = value; }
     }
 
     [SerializeField] TextMeshProUGUI cameraMoveSpeedText;
@@ -112,8 +112,8 @@ public class SettingsController : MonoBehaviour
 
     private void OnEscPressed(InputAction.CallbackContext context)
     {
-        _isOpen = !_isOpen;
-        settingsPanel.SetActive(_isOpen);
+        isOpen = !isOpen;
+        settingsPanel.SetActive(isOpen);
     }
 
     public void OnCameraMoveSpeedChange(float value)

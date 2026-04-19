@@ -47,7 +47,7 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        if (SelectCharacter.instance.clickingUI || SettingsController.instance.isOpen) return;
+        if (SelectCharacter.instance.clickingUI || SettingsController.instance.isOpen || EmotionDefinitionUI.instance.isOpen) return;
         CameraMove();
         RotateCamera();
         Zoom();

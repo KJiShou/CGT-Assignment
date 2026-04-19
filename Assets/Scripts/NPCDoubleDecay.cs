@@ -496,6 +496,53 @@ public class NPCDoubleDecay : MonoBehaviour
         currentTrend = "Stable";
     }
 
+    // ================== Developer Debug Tools ==================
+
+    [Header("Debug & Testing")]
+    [Tooltip("Input emotion name, then right click script and select Test Trigger Emotion function")]
+    public string testEmotionName = "Joy";
+
+    [ContextMenu("Test Trigger Emotion")]
+    public string TriggerTestEmotion()
+    {
+        return (ForceEmotion(testEmotionName));
+    }
+
+    /// <summary>
+    /// Provide developer through external code or UI to trigger specific emotion
+    /// </summary>
+    /// <param name="targetEmotionName">Emotion name must exactly same with emotion define in EmotionClassifier (can ignore case)</param>
+    public string ForceEmotion(string targetEmotionName)
+    {
+        if (EmotionClassifier.instance == null || EmotionClassifier.instance.emotionDefinitions == null)
+        {
+            Debug.LogError("EmotionClassifier instance or definition haven't initialize!");
+            return "EmotionClassifier instance or definition haven't initialize!";
+        }
+
+        // index = -1 equal not found
+        int defIndex = EmotionClassifier.instance.emotionDefinitions.FindIndex(
+            e => string.Equals(e.emotionName, targetEmotionName, StringComparison.OrdinalIgnoreCase));
+
+        if (defIndex != -1)
+        {
+            var targetDef = EmotionClassifier.instance.emotionDefinitions[defIndex];
+
+            currentEmotion = targetDef.vadCentroid;
+            finalEmotion = targetDef.vadCentroid;
+
+            isTalkWithPlayer = true;
+
+            Debug.Log($"<color=cyan>[Debug] Successfully force trigger emotion: {targetDef.emotionName} | VAD: {targetDef.vadCentroid}</color>");
+            return "";
+        }
+        else
+        {
+            Debug.LogError($"[Debug] Trigger failed! Can't found '{targetEmotionName}' in EmotionClassifier, please check spelling!");
+            return $"Trigger failed! Can't found '{targetEmotionName}' in EmotionClassifier, please check spelling!";
+        }
+    }
+
     // ================== OnGUI Real-Time Emotion Probability Ranking ==================
 
     [Header("GUI Settings")]
@@ -518,7 +565,7 @@ public class NPCDoubleDecay : MonoBehaviour
     private void OnGUI()
     {
         // No open or no emotion ranking data then skip
-        if (SettingsController.instance.isOpen || !showOnGUI || emotionRanking == null || emotionRanking.Count == 0) return;
+        if (SettingsController.instance.isOpen || EmotionDefinitionUI.instance.isOpen || !showOnGUI || emotionRanking == null || emotionRanking.Count == 0) return;
 
         // Init painter and texture
         if (barTexture == null)
@@ -534,7 +581,7 @@ public class NPCDoubleDecay : MonoBehaviour
         }
 
         // define panel area
-        int panelWidth = 300;
+        int panelWidth = 320;
         int rowHeight = 25;
         int sectionGap = 8;
         int labelHeight = 20;
@@ -577,7 +624,7 @@ public class NPCDoubleDecay : MonoBehaviour
 
             // Percentage
             string percentText = (score.probability * 100f).ToString("F1") + "%";
-            GUI.Label(new Rect((currentPanelRect.x + 200), yPos, 50, 20), percentText, labelStyle);
+            GUI.Label(new Rect((currentPanelRect.x + 250), yPos + 5, 50, 20), percentText, labelStyle);
 
             // Dynamic progress bar
             float maxBarWidth = 90f;
@@ -609,7 +656,7 @@ public class NPCDoubleDecay : MonoBehaviour
 
             // Percentage
             string percentText = (score.probability * 100f).ToString("F1") + "%";
-            GUI.Label(new Rect((currentPanelRect.x + 200), yPos, 50, 20), percentText, labelStyle);
+            GUI.Label(new Rect((currentPanelRect.x + 250), yPos + 5, 50, 20), percentText, labelStyle);
 
             // Dynamic progress bar
             float maxBarWidth = 90f;
