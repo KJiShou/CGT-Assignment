@@ -37,6 +37,11 @@ public class SliderController : MonoBehaviour
     public TextMeshProUGUI maxInputHistoryText;
     public Slider maxInputHistorySlider;
 
+    [Header("Emotion Classifier UI")]
+    public TextMeshProUGUI valenceText;
+    public TextMeshProUGUI arousalText;
+    public TextMeshProUGUI dominanceText;
+
     [Header("Player Settings Panel")]
     [Tooltip("Reference to the Player Settings panel GameObject")]
     public GameObject playerSettingsPanel;
@@ -192,6 +197,30 @@ public class SliderController : MonoBehaviour
             int v = ConvertFloatToInt(value);
             maxInputHistoryText.text = v.ToString();
             npcState.maxPlayerInputHistory = v;
+        }
+    }
+
+    public void OnValenceChanged(float value)
+    {
+        if (valenceText != null)
+        {
+            valenceText.text = RoundToAnyFloatingPoint(value, 2).ToString();
+        }
+    }
+
+    public void OnArousalChanged(float value)
+    {
+        if (arousalText != null)
+        {
+            arousalText.text = RoundToAnyFloatingPoint(value, 2).ToString();
+        }
+    }
+
+    public void OnDominanceChanged(float value)
+    {
+        if (dominanceText != null)
+        {
+            dominanceText.text = RoundToAnyFloatingPoint(value, 2).ToString();
         }
     }
 
